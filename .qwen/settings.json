@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//mnt/data/web/daddyProjectInfaq_sqlite/**)",
+      "Read(//home/gembong/Desktop/web/smk_mysql/**)",
+      "Bash(node *)",
+      "Bash(sqlite3 *)",
+      "Bash(ls *)"
+    ]
+  },
+  "$version": 3
+}

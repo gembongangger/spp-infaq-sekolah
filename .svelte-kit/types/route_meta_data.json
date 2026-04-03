@@ -1,0 +1,74 @@
+{
+	"/": [],
+	"/api/admin/profile": [
+		"src/routes/api/admin/profile/+server.ts"
+	],
+	"/api/auth/change-password": [
+		"src/routes/api/auth/change-password/+server.ts"
+	],
+	"/api/auth/login": [
+		"src/routes/api/auth/login/+server.ts"
+	],
+	"/api/auth/logout": [
+		"src/routes/api/auth/logout/+server.ts"
+	],
+	"/api/auth/me": [
+		"src/routes/api/auth/me/+server.ts"
+	],
+	"/api/auth/reset-password": [
+		"src/routes/api/auth/reset-password/+server.ts"
+	],
+	"/api/health": [
+		"src/routes/api/health/+server.ts"
+	],
+	"/api/kategori": [
+		"src/routes/api/kategori/+server.ts"
+	],
+	"/api/kategori/[id]": [
+		"src/routes/api/kategori/[id]/+server.ts"
+	],
+	"/api/siswa": [
+		"src/routes/api/siswa/+server.ts"
+	],
+	"/api/siswa/download-template": [
+		"src/routes/api/siswa/download-template/+server.ts"
+	],
+	"/api/siswa/search": [
+		"src/routes/api/siswa/search/+server.ts"
+	],
+	"/api/siswa/upload-excel": [
+		"src/routes/api/siswa/upload-excel/+server.ts"
+	],
+	"/api/siswa/[id]": [
+		"src/routes/api/siswa/[id]/+server.ts"
+	],
+	"/api/superadmin/admin-sekolah": [
+		"src/routes/api/superadmin/admin-sekolah/+server.ts"
+	],
+	"/api/superadmin/admin-sekolah/[id]": [
+		"src/routes/api/superadmin/admin-sekolah/[id]/+server.ts"
+	],
+	"/api/superadmin/sekolah": [
+		"src/routes/api/superadmin/sekolah/+server.ts"
+	],
+	"/api/superadmin/sekolah/[id]": [
+		"src/routes/api/superadmin/sekolah/[id]/+server.ts"
+	],
+	"/api/transaksi": [
+		"src/routes/api/transaksi/+server.ts"
+	],
+	"/api/transaksi/senders": [
+		"src/routes/api/transaksi/senders/+server.ts"
+	],
+	"/api/transaksi/stats": [
+		"src/routes/api/transaksi/stats/+server.ts"
+	],
+	"/api/transaksi/[id]": [
+		"src/routes/api/transaksi/[id]/+server.ts"
+	],
+	"/login": [],
+	"/pengirim": [],
+	"/reset-password": [],
+	"/superadmin/dashboard": [],
+	"/superadmin/login": []
+}

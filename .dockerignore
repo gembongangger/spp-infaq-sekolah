@@ -1,0 +1,16 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+*.md
+.env
+.env.local
+.svelte-kit
+build
+dist
+.vscode
+.idea
+*.log
+flask_backend
+data/*.db
+!data/.gitkeep

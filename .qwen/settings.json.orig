@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//mnt/data/web/daddyProjectInfaq_sqlite/**)"
+    ]
+  }
+}
