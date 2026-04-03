@@ -11,6 +11,17 @@ import * as xlsx from 'xlsx';
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
 		const session = await auth.requireAuth(cookies);
+
+		if (session.role !== 'superadmin' && !session.sekolah_id) {
+			return json(
+				{
+					success: false,
+					message: 'Admin tidak memiliki sekolah aktif',
+				},
+				{ status: 403 }
+			);
+		}
+
 		const formData = await request.formData();
 		const file = formData.get('file') as File | null;
 

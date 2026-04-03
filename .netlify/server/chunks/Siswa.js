@@ -44,6 +44,15 @@ const Siswa = {
     if (result.rows.length === 0) return null;
     return result.rows[0];
   },
+  /** Get siswa by nomor_akun within school */
+  async findByNomorAkunInSekolah(nomorAkun, sekolahId) {
+    const result = await db.execute({
+      sql: "SELECT * FROM siswa WHERE nomor_akun = ? AND sekolah_id IS ?",
+      args: [nomorAkun, sekolahId]
+    });
+    if (result.rows.length === 0) return null;
+    return result.rows[0];
+  },
   /** Create new siswa */
   async create(data) {
     const id = v4();

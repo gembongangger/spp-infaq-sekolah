@@ -1,8 +1,11 @@
 import { json } from "@sveltejs/kit";
 import { T as Transaksi } from "../../../../../chunks/Transaksi.js";
-const GET = async () => {
+import { a as auth } from "../../../../../chunks/index2.js";
+const GET = async ({ url, cookies }) => {
   try {
-    const senders = await Transaksi.getSenders();
+    const session = await auth.requireAuth(cookies);
+    const sekolahId = session.role === "superadmin" ? url.searchParams.get("sekolah_id") || void 0 : session.sekolah_id || void 0;
+    const senders = await Transaksi.getSenders(sekolahId);
     return json(
       {
         success: true,

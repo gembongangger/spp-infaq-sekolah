@@ -1,8 +1,11 @@
 import { json } from "@sveltejs/kit";
 import { S as Siswa } from "../../../../chunks/Siswa.js";
-const GET = async () => {
+import { a as auth } from "../../../../chunks/index2.js";
+const GET = async ({ url, cookies }) => {
   try {
-    const siswaList = await Siswa.getAll();
+    const session = await auth.requireAuth(cookies);
+    const sekolahId = session.role === "superadmin" ? url.searchParams.get("sekolah_id") : session.sekolah_id;
+    const siswaList = sekolahId ? await Siswa.getBySekolah(sekolahId) : await Siswa.getAll();
     return json(
       {
         success: true,
@@ -20,8 +23,9 @@ const GET = async () => {
     );
   }
 };
-const POST = async ({ request }) => {
+const POST = async ({ request, cookies }) => {
   try {
+    const session = await auth.requireAuth(cookies);
     const data = await request.json();
     if (!data || !data.nomorAkun || !data.nama || !data.kelas) {
       return json(
@@ -32,12 +36,22 @@ const POST = async ({ request }) => {
         { status: 400 }
       );
     }
-    const existing = await Siswa.findByNomorAkun(data.nomorAkun);
+    const sekolahId = session.role === "superadmin" ? data.sekolahId || data.sekolah_id || null : session.sekolah_id;
+    if (session.role !== "superadmin" && !sekolahId) {
+      return json(
+        {
+          success: false,
+          message: "Admin tidak memiliki sekolah aktif"
+        },
+        { status: 403 }
+      );
+    }
+    const existing = await Siswa.findByNomorAkunInSekolah(data.nomorAkun, sekolahId);
     if (existing) {
       return json(
         {
           success: false,
-          message: "Nomor akun already exists"
+          message: "Nomor akun already exists in this school"
         },
         { status: 400 }
       );
@@ -45,7 +59,8 @@ const POST = async ({ request }) => {
     const siswa = await Siswa.create({
       nomorAkun: data.nomorAkun,
       nama: data.nama,
-      kelas: data.kelas
+      kelas: data.kelas,
+      sekolah_id: sekolahId
     });
     return json(
       {

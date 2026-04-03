@@ -1,7 +1,13 @@
 import { json } from "@sveltejs/kit";
 import { T as Transaksi } from "../../../../../chunks/Transaksi.js";
-const GET = async ({ params }) => {
+import { a as auth } from "../../../../../chunks/index2.js";
+import { S as Siswa } from "../../../../../chunks/Siswa.js";
+function canAccessTransaksi(role, sessionSekolahId, transaksiSekolahId) {
+  return role === "superadmin" || sessionSekolahId === transaksiSekolahId;
+}
+const GET = async ({ params, cookies }) => {
   try {
+    const session = await auth.requireAuth(cookies);
     const transaksi = await Transaksi.findById(params.id);
     if (!transaksi) {
       return json(
@@ -10,6 +16,15 @@ const GET = async ({ params }) => {
           message: "Transaksi not found"
         },
         { status: 404 }
+      );
+    }
+    if (!canAccessTransaksi(session.role, session.sekolah_id, transaksi.sekolah_id || null)) {
+      return json(
+        {
+          success: false,
+          message: "Akses ditolak"
+        },
+        { status: 403 }
       );
     }
     return json(
@@ -29,8 +44,9 @@ const GET = async ({ params }) => {
     );
   }
 };
-const PUT = async ({ params, request }) => {
+const PUT = async ({ params, request, cookies }) => {
   try {
+    const session = await auth.requireAuth(cookies);
     const transaksi = await Transaksi.findById(params.id);
     if (!transaksi) {
       return json(
@@ -39,6 +55,15 @@ const PUT = async ({ params, request }) => {
           message: "Transaksi not found"
         },
         { status: 404 }
+      );
+    }
+    if (!canAccessTransaksi(session.role, session.sekolah_id, transaksi.sekolah_id || null)) {
+      return json(
+        {
+          success: false,
+          message: "Akses ditolak"
+        },
+        { status: 403 }
       );
     }
     const data = await request.json();
@@ -55,7 +80,30 @@ const PUT = async ({ params, request }) => {
     if (data.jenis !== void 0) updateData.jenis = data.jenis;
     if (data.jumlah !== void 0) updateData.jumlah = parseFloat(data.jumlah);
     if (data.metode !== void 0) updateData.metode = data.metode;
-    if (data.siswaId !== void 0) updateData.siswa_id = data.siswaId || null;
+    if (data.siswaId !== void 0) {
+      if (data.siswaId) {
+        const siswa = await Siswa.findById(data.siswaId);
+        if (!siswa) {
+          return json(
+            {
+              success: false,
+              message: "Siswa tidak ditemukan"
+            },
+            { status: 404 }
+          );
+        }
+        if (!canAccessTransaksi(session.role, session.sekolah_id, siswa.sekolah_id || null)) {
+          return json(
+            {
+              success: false,
+              message: "Akses ditolak untuk siswa dari sekolah lain"
+            },
+            { status: 403 }
+          );
+        }
+      }
+      updateData.siswa_id = data.siswaId || null;
+    }
     if (data.namaPengirim !== void 0) updateData.nama_pengirim = data.namaPengirim || null;
     if (data.kelasPengirim !== void 0) updateData.kelas_pengirim = data.kelasPengirim || null;
     if (data.nomorAkun !== void 0) updateData.nomor_akun = data.nomorAkun || null;
@@ -88,8 +136,9 @@ const PUT = async ({ params, request }) => {
     );
   }
 };
-const DELETE = async ({ params }) => {
+const DELETE = async ({ params, cookies }) => {
   try {
+    const session = await auth.requireAuth(cookies);
     const transaksi = await Transaksi.findById(params.id);
     if (!transaksi) {
       return json(
@@ -98,6 +147,15 @@ const DELETE = async ({ params }) => {
           message: "Transaksi not found"
         },
         { status: 404 }
+      );
+    }
+    if (!canAccessTransaksi(session.role, session.sekolah_id, transaksi.sekolah_id || null)) {
+      return json(
+        {
+          success: false,
+          message: "Akses ditolak"
+        },
+        { status: 403 }
       );
     }
     await Transaksi.delete(params.id);

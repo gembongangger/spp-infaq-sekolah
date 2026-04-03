@@ -42,6 +42,15 @@ const Kategori = {
     if (result.rows.length === 0) return null;
     return result.rows[0];
   },
+  /** Get kategori by nama within school */
+  async findByNamaInSekolah(nama, sekolahId) {
+    const result = await db.execute({
+      sql: "SELECT * FROM kategori WHERE nama = ? AND sekolah_id IS ?",
+      args: [nama, sekolahId]
+    });
+    if (result.rows.length === 0) return null;
+    return result.rows[0];
+  },
   /** Create new kategori */
   async create(data) {
     const id = v4();

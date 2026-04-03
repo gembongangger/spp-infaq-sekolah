@@ -1,7 +1,10 @@
 import { json } from "@sveltejs/kit";
 import { T as Transaksi } from "../../../../chunks/Transaksi.js";
-const GET = async ({ url }) => {
+import { a as auth } from "../../../../chunks/index2.js";
+import { S as Siswa } from "../../../../chunks/Siswa.js";
+const GET = async ({ url, cookies }) => {
   try {
+    const session = await auth.requireAuth(cookies);
     const filters = {};
     if (url.searchParams.has("kategori")) {
       filters.kategori = url.searchParams.get("kategori") || void 0;
@@ -21,7 +24,11 @@ const GET = async ({ url }) => {
     if (url.searchParams.has("limit")) {
       filters.limit = parseInt(url.searchParams.get("limit") || "0", 10);
     }
-    const transaksiList = await Transaksi.getAll(filters);
+    const sekolahId = session.role === "superadmin" ? url.searchParams.get("sekolah_id") || void 0 : session.sekolah_id || void 0;
+    const transaksiList = await Transaksi.getAll({
+      ...filters,
+      sekolahId
+    });
     return json(
       {
         success: true,
@@ -39,8 +46,9 @@ const GET = async ({ url }) => {
     );
   }
 };
-const POST = async ({ request }) => {
+const POST = async ({ request, cookies }) => {
   try {
+    const session = await auth.requireAuth(cookies);
     const data = await request.json();
     const requiredFields = ["tanggal", "keterangan", "kategori", "jenis", "jumlah", "metode"];
     if (!data || !requiredFields.every((field) => Object.prototype.hasOwnProperty.call(data, field))) {
@@ -56,6 +64,38 @@ const POST = async ({ request }) => {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(tanggal)) {
       tanggal = new Date(tanggal).toISOString().split("T")[0];
     }
+    let sekolahId = session.role === "superadmin" ? data.sekolahId || data.sekolah_id || null : session.sekolah_id;
+    if (data.siswaId) {
+      const siswa = await Siswa.findById(data.siswaId);
+      if (!siswa) {
+        return json(
+          {
+            success: false,
+            message: "Siswa tidak ditemukan"
+          },
+          { status: 404 }
+        );
+      }
+      if (session.role !== "superadmin" && siswa.sekolah_id !== session.sekolah_id) {
+        return json(
+          {
+            success: false,
+            message: "Akses ditolak untuk siswa dari sekolah lain"
+          },
+          { status: 403 }
+        );
+      }
+      sekolahId = sekolahId || siswa.sekolah_id || null;
+    }
+    if (session.role !== "superadmin" && !sekolahId) {
+      return json(
+        {
+          success: false,
+          message: "Admin tidak memiliki sekolah aktif"
+        },
+        { status: 403 }
+      );
+    }
     const transaksi = await Transaksi.create({
       tanggal,
       keterangan: data.keterangan,
@@ -67,7 +107,8 @@ const POST = async ({ request }) => {
       namaPengirim: data.namaPengirim || null,
       kelasPengirim: data.kelasPengirim || null,
       nomorAkun: data.nomorAkun || null,
-      bulan: data.bulan || null
+      bulan: data.bulan || null,
+      sekolah_id: sekolahId
     });
     return json(
       {

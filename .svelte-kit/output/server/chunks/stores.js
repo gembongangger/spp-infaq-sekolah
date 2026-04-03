@@ -66,14 +66,21 @@ const transaksiApi = {
     return response.data;
   }
 };
+const healthCheck = async () => {
+  try {
+    const response = await fetchApi("/health");
+    return response.success;
+  } catch {
+    return false;
+  }
+};
 const apiConnected = writable(false);
 readable(false, (set) => {
   async function checkConnection() {
     try {
-      const response = await fetch("http://localhost:5000/api/health");
-      const data = await response.json();
-      set(data.success);
-      apiConnected.set(data.success);
+      const isHealthy = await healthCheck();
+      set(isHealthy);
+      apiConnected.set(isHealthy);
     } catch {
       set(false);
       apiConnected.set(false);

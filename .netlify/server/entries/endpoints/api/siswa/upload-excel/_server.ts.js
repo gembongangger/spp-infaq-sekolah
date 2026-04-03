@@ -1,8 +1,10 @@
 import { json } from "@sveltejs/kit";
 import { S as Siswa } from "../../../../../chunks/Siswa.js";
+import { a as auth } from "../../../../../chunks/index2.js";
 import * as XLSX from "xlsx";
-const POST = async ({ request }) => {
+const POST = async ({ request, cookies }) => {
   try {
+    const session = await auth.requireAuth(cookies);
     const formData = await request.formData();
     const file = formData.get("file");
     if (!file) {
@@ -56,6 +58,7 @@ const POST = async ({ request }) => {
     const idxNomorAkun = normalizedHeaders.indexOf("nomorakun");
     const idxNama = normalizedHeaders.indexOf("nama");
     const idxKelas = normalizedHeaders.indexOf("kelas");
+    const sekolahId = session.role === "superadmin" ? null : session.sekolah_id;
     const studentsToImport = [];
     const rowErrors = [];
     for (let rowIdx = 1; rowIdx < data.length; rowIdx++) {
@@ -71,7 +74,7 @@ const POST = async ({ request }) => {
         rowErrors.push(`Baris ${rowNumber}: Data tidak lengkap`);
         continue;
       }
-      studentsToImport.push({ nomorAkun, nama, kelas, rowNumber });
+      studentsToImport.push({ nomorAkun, nama, kelas, sekolah_id: sekolahId, rowNumber });
     }
     if (studentsToImport.length === 0) {
       return json(
@@ -88,7 +91,7 @@ const POST = async ({ request }) => {
         { status: 400 }
       );
     }
-    const result = Siswa.batchCreate(studentsToImport);
+    const result = await Siswa.batchCreate(studentsToImport);
     const mergedErrors = [...rowErrors, ...result.errors];
     const totalFailed = result.failed + rowErrors.length;
     const messageParts = [];

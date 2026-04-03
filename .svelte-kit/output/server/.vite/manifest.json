@@ -362,7 +362,8 @@
     "src": "src/routes/api/kategori/+server.ts",
     "isEntry": true,
     "imports": [
-      "_Kategori.js"
+      "_Kategori.js",
+      "_index2.js"
     ]
   },
   "src/routes/api/kategori/[id]/+server.ts": {
@@ -371,7 +372,8 @@
     "src": "src/routes/api/kategori/[id]/+server.ts",
     "isEntry": true,
     "imports": [
-      "_Kategori.js"
+      "_Kategori.js",
+      "_index2.js"
     ]
   },
   "src/routes/api/siswa/+server.ts": {
@@ -380,7 +382,8 @@
     "src": "src/routes/api/siswa/+server.ts",
     "isEntry": true,
     "imports": [
-      "_Siswa.js"
+      "_Siswa.js",
+      "_index2.js"
     ]
   },
   "src/routes/api/siswa/[id]/+server.ts": {
@@ -389,7 +392,8 @@
     "src": "src/routes/api/siswa/[id]/+server.ts",
     "isEntry": true,
     "imports": [
-      "_Siswa.js"
+      "_Siswa.js",
+      "_index2.js"
     ]
   },
   "src/routes/api/siswa/download-template/+server.ts": {
@@ -404,7 +408,8 @@
     "src": "src/routes/api/siswa/search/+server.ts",
     "isEntry": true,
     "imports": [
-      "_Siswa.js"
+      "_Siswa.js",
+      "_index2.js"
     ]
   },
   "src/routes/api/siswa/upload-excel/+server.ts": {
@@ -413,7 +418,8 @@
     "src": "src/routes/api/siswa/upload-excel/+server.ts",
     "isEntry": true,
     "imports": [
-      "_Siswa.js"
+      "_Siswa.js",
+      "_index2.js"
     ]
   },
   "src/routes/api/superadmin/admin-sekolah/+server.ts": {
@@ -467,7 +473,9 @@
     "src": "src/routes/api/transaksi/+server.ts",
     "isEntry": true,
     "imports": [
-      "_Transaksi.js"
+      "_Transaksi.js",
+      "_index2.js",
+      "_Siswa.js"
     ]
   },
   "src/routes/api/transaksi/[id]/+server.ts": {
@@ -476,7 +484,9 @@
     "src": "src/routes/api/transaksi/[id]/+server.ts",
     "isEntry": true,
     "imports": [
-      "_Transaksi.js"
+      "_Transaksi.js",
+      "_index2.js",
+      "_Siswa.js"
     ]
   },
   "src/routes/api/transaksi/senders/+server.ts": {
@@ -485,7 +495,8 @@
     "src": "src/routes/api/transaksi/senders/+server.ts",
     "isEntry": true,
     "imports": [
-      "_Transaksi.js"
+      "_Transaksi.js",
+      "_index2.js"
     ]
   },
   "src/routes/api/transaksi/stats/+server.ts": {
@@ -494,7 +505,8 @@
     "src": "src/routes/api/transaksi/stats/+server.ts",
     "isEntry": true,
     "imports": [
-      "_Transaksi.js"
+      "_Transaksi.js",
+      "_index2.js"
     ]
   },
   "src/routes/login/+page.svelte": {

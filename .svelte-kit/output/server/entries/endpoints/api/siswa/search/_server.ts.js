@@ -1,7 +1,9 @@
 import { json } from "@sveltejs/kit";
 import { S as Siswa } from "../../../../../chunks/Siswa.js";
-const GET = async ({ url }) => {
+import { a as auth } from "../../../../../chunks/index2.js";
+const GET = async ({ url, cookies }) => {
   try {
+    const session = await auth.requireAuth(cookies);
     const query = url.searchParams.get("q") || "";
     const page = parseInt(url.searchParams.get("page") || "1");
     const limit = parseInt(url.searchParams.get("limit") || "20");
@@ -9,6 +11,7 @@ const GET = async ({ url }) => {
     const offset = (page - 1) * limit;
     const result = await Siswa.search({
       query,
+      sekolahId: session.role === "superadmin" ? url.searchParams.get("sekolah_id") : session.sekolah_id,
       limit,
       offset
     });

@@ -28,7 +28,8 @@ const auth = {
       user_id: user.id,
       username: user.username,
       email: user.email,
-      role: user.role
+      role: user.role,
+      sekolah_id: user.sekolah_id || null
     };
   },
   /** Clear session */

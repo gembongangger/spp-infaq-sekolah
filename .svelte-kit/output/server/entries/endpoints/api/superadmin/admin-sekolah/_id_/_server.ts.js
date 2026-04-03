@@ -1,6 +1,7 @@
 import { json } from "@sveltejs/kit";
 import { U as User } from "../../../../../../chunks/User.js";
 import { a as auth } from "../../../../../../chunks/index2.js";
+import "bcryptjs";
 const PUT = async ({ params, request, cookies }) => {
   try {
     const session = await auth.requireAuth(cookies);
