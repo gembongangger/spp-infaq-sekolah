@@ -178,7 +178,7 @@
 
 <div class="max-w-5xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
 	<AppHeader
-		{apiConnected}
+		apiConnected={isConnected}
 		{currentTheme}
 		onShowLogoutModal={() => showLogoutModal = true}
 		onShowProfileModal={() => showProfileModal = true}
@@ -209,7 +209,7 @@
 	<TabNavigation />
 
 	{#if $activeTab === 'dashboard'}
-		<DashboardTab stats={currentStats} {currentTheme} />
+		<DashboardTab stats={currentStats} />
 	{/if}
 
 	{#if $activeTab === 'students'}
@@ -286,7 +286,7 @@
 		<div class="{currentTheme === 'dark' ? 'bg-[#1e293b] border border-[#334155]' : 'bg-white border border-slate-200'} rounded-2xl p-6 w-full max-w-sm">
 			<div class="text-center mb-4">
 				<div class="w-12 h-12 rounded-full bg-[#ef4444]/10 flex items-center justify-center mx-auto mb-3">
-					<svg size={24} class="text-[#ef4444]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<svg width="24" height="24" class="text-[#ef4444]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 						<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
 						<polyline points="16 17 21 12 16 7" />
 						<line x1="21" y1="12" x2="9" y2="12" />

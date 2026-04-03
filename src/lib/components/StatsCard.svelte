@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Component } from 'svelte';
 	import * as Lucide from 'lucide-svelte';
 	import { formatRupiah } from '$lib/utils';
 	import { theme } from '$lib/stores';
@@ -15,7 +16,7 @@
 	let { label, value, icon, color, borderColor, bgColor }: Props = $props();
 	let currentTheme = $derived($theme);
 
-	let Icon = $derived(Lucide[icon]);
+	let Icon = $derived(Lucide[icon] as unknown as Component<{ size?: number; color?: string }>);
 </script>
 
 <div

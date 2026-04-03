@@ -1,12 +1,24 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { X } from 'lucide-svelte';
 
-	let { title, onClose, children } = $props();
+	interface Props {
+		title: string;
+		onClose: () => void;
+		children: Snippet;
+	}
+
+	let { title, onClose, children }: Props = $props();
 </script>
 
 <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
 	<!-- Backdrop -->
-	<div class="fixed inset-0 bg-black/50 backdrop-blur-sm" onclick={onClose}></div>
+	<button
+		type="button"
+		class="fixed inset-0 bg-black/50 backdrop-blur-sm"
+		aria-label="Tutup modal"
+		onclick={onClose}
+	></button>
 
 	<!-- Modal -->
 	<div class="relative bg-[#1e293b] rounded-2xl border border-[#334155] shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">

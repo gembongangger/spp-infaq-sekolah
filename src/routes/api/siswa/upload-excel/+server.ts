@@ -5,10 +5,12 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { Siswa } from '$lib/server/models/Siswa';
+import { auth } from '$lib/server/auth';
 import * as xlsx from 'xlsx';
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
+		const session = await auth.requireAuth(cookies);
 		const formData = await request.formData();
 		const file = formData.get('file') as File | null;
 
@@ -81,7 +83,8 @@ export const POST: RequestHandler = async ({ request }) => {
 		const idxKelas = normalizedHeaders.indexOf('kelas');
 
 		// Process data rows
-		const studentsToImport: { nomorAkun: string; nama: string; kelas: string; rowNumber: number }[] = [];
+		const sekolahId = session.role === 'superadmin' ? null : session.sekolah_id;
+		const studentsToImport: { nomorAkun: string; nama: string; kelas: string; sekolah_id?: string | null; rowNumber: number }[] = [];
 		const rowErrors: string[] = [];
 
 		for (let rowIdx = 1; rowIdx < data.length; rowIdx++) {
@@ -102,7 +105,7 @@ export const POST: RequestHandler = async ({ request }) => {
 				continue;
 			}
 
-			studentsToImport.push({ nomorAkun, nama, kelas, rowNumber });
+			studentsToImport.push({ nomorAkun, nama, kelas, sekolah_id: sekolahId, rowNumber });
 		}
 
 		if (studentsToImport.length === 0) {
@@ -122,7 +125,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		// Batch import
-		const result = Siswa.batchCreate(studentsToImport);
+		const result = await Siswa.batchCreate(studentsToImport);
 
 		// Merge parsing errors & database errors
 		const mergedErrors = [...rowErrors, ...result.errors];

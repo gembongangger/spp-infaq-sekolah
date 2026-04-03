@@ -73,6 +73,16 @@ export const Siswa = {
 		return result.rows[0] as unknown as Siswa;
 	},
 
+	/** Get siswa by nomor_akun within school */
+	async findByNomorAkunInSekolah(nomorAkun: string, sekolahId: string | null): Promise<Siswa | null> {
+		const result = await db.execute({
+			sql: 'SELECT * FROM siswa WHERE nomor_akun = ? AND sekolah_id IS ?',
+			args: [nomorAkun, sekolahId]
+		});
+		if (result.rows.length === 0) return null;
+		return result.rows[0] as unknown as Siswa;
+	},
+
 	/** Create new siswa */
 	async create(data: { nomorAkun: string; nama: string; kelas: string; sekolah_id?: string | null }): Promise<Siswa> {
 		const id = uuidv4();

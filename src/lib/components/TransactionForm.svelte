@@ -13,6 +13,9 @@
 	let jumlah = $state<number>(0);
 	let selectedStudentId = $state('');
 	let currentTheme = $derived($theme);
+	let allStudents = $derived($students);
+	let allCategories = $derived($categories);
+	let isLoading = $state(false);
 
 	// Search state
 	let searchQuery = $state('');
@@ -70,10 +73,6 @@
 	let selectedMonth = $state(new Date().toISOString().split('-')[1]);
 	let selectedYear = $state(currentYearNum.toString());
 	let bulan = $derived(`${selectedYear}-${selectedMonth}`);
-
-	let allStudents = $derived($students);
-	let allCategories = $derived($categories);
-	let isLoading = $state(false);
 
 	// Show add category modal
 	let showAddCategory = $state(false);
@@ -478,7 +477,7 @@
 		<h3 class="text-xs font-semibold mb-3 {textMuted}">👤 Data Pengirim</h3>
 		
 		<!-- Search Input -->
-		<div class="relative mb-3" onclick_outside={() => isSearchOpen = false}>
+		<div class="relative mb-3">
 			<div class="flex gap-2">
 				<div class="relative flex-1">
 					<Search size={16} class="absolute left-3 top-1/2 -translate-y-1/2 {textMuted}" />

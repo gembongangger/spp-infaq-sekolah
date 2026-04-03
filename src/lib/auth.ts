@@ -3,18 +3,23 @@
  * Now using SvelteKit backend with relative paths
  */
 
+export interface AuthUser {
+	id: string;
+	username: string;
+	email: string;
+	role: string;
+	isActive: boolean;
+	nama_lengkap: string | null;
+	no_hp: string | null;
+	foto_url: string | null;
+	createdAt: string;
+	updatedAt: string;
+}
+
 interface LoginResponse {
 	success: boolean;
 	message: string;
-	data: {
-		id: string;
-		username: string;
-		email: string;
-		role: string;
-		nama_lengkap: string | null;
-		no_hp: string | null;
-		foto_url: string | null;
-	};
+	data: AuthUser;
 }
 
 interface ResetPasswordResponse {

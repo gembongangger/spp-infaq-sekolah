@@ -67,6 +67,16 @@ export const Kategori = {
 		return result.rows[0] as unknown as Kategori;
 	},
 
+	/** Get kategori by nama within school */
+	async findByNamaInSekolah(nama: string, sekolahId: string | null): Promise<Kategori | null> {
+		const result = await db.execute({
+			sql: 'SELECT * FROM kategori WHERE nama = ? AND sekolah_id IS ?',
+			args: [nama, sekolahId]
+		});
+		if (result.rows.length === 0) return null;
+		return result.rows[0] as unknown as Kategori;
+	},
+
 	/** Create new kategori */
 	async create(data: { nama: string; ikon?: string; warna?: string; sekolah_id?: string | null }): Promise<Kategori> {
 		const id = uuidv4();

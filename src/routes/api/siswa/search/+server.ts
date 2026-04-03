@@ -4,9 +4,11 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { Siswa } from '$lib/server/models/Siswa';
+import { auth } from '$lib/server/auth';
 
-export const GET: RequestHandler = async ({ url }) => {
+export const GET: RequestHandler = async ({ url, cookies }) => {
 	try {
+		const session = await auth.requireAuth(cookies);
 		const query = url.searchParams.get('q') || '';
 		const page = parseInt(url.searchParams.get('page') || '1');
 		const limit = parseInt(url.searchParams.get('limit') || '20');
@@ -17,6 +19,10 @@ export const GET: RequestHandler = async ({ url }) => {
 
 		const result = await Siswa.search({
 			query,
+			sekolahId:
+				session.role === 'superadmin'
+					? url.searchParams.get('sekolah_id')
+					: session.sekolah_id,
 			limit,
 			offset
 		});

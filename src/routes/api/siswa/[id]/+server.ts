@@ -6,9 +6,15 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { Siswa } from '$lib/server/models/Siswa';
+import { auth } from '$lib/server/auth';
 
-export const GET: RequestHandler = async ({ params }) => {
+function canAccessSiswa(role: string, sessionSekolahId: string | null, siswaSekolahId: string | null) {
+	return role === 'superadmin' || sessionSekolahId === siswaSekolahId;
+}
+
+export const GET: RequestHandler = async ({ params, cookies }) => {
 	try {
+		const session = await auth.requireAuth(cookies);
 		const siswa = await Siswa.findById(params.id);
 
 		if (!siswa) {
@@ -18,6 +24,16 @@ export const GET: RequestHandler = async ({ params }) => {
 					message: 'Siswa not found',
 				},
 				{ status: 404 }
+			);
+		}
+
+		if (!canAccessSiswa(session.role, session.sekolah_id, siswa.sekolah_id || null)) {
+			return json(
+				{
+					success: false,
+					message: 'Akses ditolak',
+				},
+				{ status: 403 }
 			);
 		}
 
@@ -39,8 +55,9 @@ export const GET: RequestHandler = async ({ params }) => {
 	}
 };
 
-export const PUT: RequestHandler = async ({ params, request }) => {
+export const PUT: RequestHandler = async ({ params, request, cookies }) => {
 	try {
+		const session = await auth.requireAuth(cookies);
 		const siswa = await Siswa.findById(params.id);
 
 		if (!siswa) {
@@ -53,16 +70,30 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 			);
 		}
 
+		if (!canAccessSiswa(session.role, session.sekolah_id, siswa.sekolah_id || null)) {
+			return json(
+				{
+					success: false,
+					message: 'Akses ditolak',
+				},
+				{ status: 403 }
+			);
+		}
+
 		const data = await request.json();
 
 		// Check duplicate nomor_akun if changed
 		if (data.nomorAkun && data.nomorAkun !== siswa.nomor_akun) {
-			const existing = await Siswa.findByNomorAkun(data.nomorAkun);
+			const targetSekolahId =
+				session.role === 'superadmin'
+					? data.sekolahId || data.sekolah_id || siswa.sekolah_id || null
+					: session.sekolah_id;
+			const existing = await Siswa.findByNomorAkunInSekolah(data.nomorAkun, targetSekolahId);
 			if (existing && existing.id !== params.id) {
 				return json(
 					{
 						success: false,
-						message: 'Nomor akun already exists',
+						message: 'Nomor akun already exists in this school',
 					},
 					{ status: 400 }
 				);
@@ -73,6 +104,10 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 			nomorAkun: data.nomorAkun,
 			nama: data.nama,
 			kelas: data.kelas,
+			sekolah_id:
+				session.role === 'superadmin'
+					? data.sekolahId ?? data.sekolah_id ?? undefined
+					: session.sekolah_id,
 		});
 
 		if (!updated) {
@@ -104,8 +139,9 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 	}
 };
 
-export const DELETE: RequestHandler = async ({ params }) => {
+export const DELETE: RequestHandler = async ({ params, cookies }) => {
 	try {
+		const session = await auth.requireAuth(cookies);
 		const siswa = await Siswa.findById(params.id);
 
 		if (!siswa) {
@@ -115,6 +151,16 @@ export const DELETE: RequestHandler = async ({ params }) => {
 					message: 'Siswa not found',
 				},
 				{ status: 404 }
+			);
+		}
+
+		if (!canAccessSiswa(session.role, session.sekolah_id, siswa.sekolah_id || null)) {
+			return json(
+				{
+					success: false,
+					message: 'Akses ditolak',
+				},
+				{ status: 403 }
 			);
 		}
 

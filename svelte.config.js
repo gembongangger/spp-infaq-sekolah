@@ -18,7 +18,7 @@ const config = {
 			'$lib/*': './src/lib/*'
 		},
 		csrf: {
-			checkOrigin: false
+			trustedOrigins: ['*']
 		}
 	}
 };

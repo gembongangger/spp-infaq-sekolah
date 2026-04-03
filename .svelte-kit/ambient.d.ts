@@ -149,6 +149,7 @@ declare module '$env/static/private' {
 	export const LC_ALL: string;
 	export const ZED_ENVIRONMENT: string;
 	export const XDG_DATA_DIRS: string;
+	export const CODEX_SANDBOX_NETWORK_DISABLED: string;
 	export const npm_config_noproxy: string;
 	export const PATH: string;
 	export const npm_config_node_gyp: string;
@@ -360,6 +361,7 @@ declare module '$env/dynamic/private' {
 		LC_ALL: string;
 		ZED_ENVIRONMENT: string;
 		XDG_DATA_DIRS: string;
+		CODEX_SANDBOX_NETWORK_DISABLED: string;
 		npm_config_noproxy: string;
 		PATH: string;
 		npm_config_node_gyp: string;

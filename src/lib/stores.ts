@@ -1,5 +1,6 @@
 import { writable, derived, readable } from 'svelte/store';
 import { siswaApi, transaksiApi, kategoriApi, type SiswaData, type TransaksiData, type KategoriData } from './api';
+import { healthCheck } from './api';
 import { Jenis, Metode } from './types';
 
 // Store for API connection status
@@ -9,10 +10,9 @@ export const apiConnected = writable<boolean>(false);
 export const apiStatus = readable<boolean>(false, (set) => {
 	async function checkConnection() {
 		try {
-			const response = await fetch('http://localhost:5000/api/health');
-			const data = await response.json();
-			set(data.success);
-			apiConnected.set(data.success);
+			const isHealthy = await healthCheck();
+			set(isHealthy);
+			apiConnected.set(isHealthy);
 		} catch {
 			set(false);
 			apiConnected.set(false);

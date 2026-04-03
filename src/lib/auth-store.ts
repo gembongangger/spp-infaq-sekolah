@@ -1,18 +1,7 @@
 import { writable, readable } from 'svelte/store';
-import { authApi } from './auth';
+import { authApi, type AuthUser } from './auth';
 
-export interface User {
-	id: string;
-	username: string;
-	email: string;
-	role: string;
-	isActive: boolean;
-	nama_lengkap: string | null;
-	no_hp: string | null;
-	foto_url: string | null;
-	createdAt: string;
-	updatedAt: string;
-}
+export type User = AuthUser;
 
 export interface AuthState {
 	isAuthenticated: boolean;
@@ -64,7 +53,7 @@ export async function login(email: string, password: string) {
 		authStore.update((state) => ({
 			...state,
 			isAuthenticated: true,
-			user: response.data as unknown as User,
+			user: response.data,
 			isLoading: false,
 		}));
 
