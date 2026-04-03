@@ -1,5 +1,5 @@
 import { r as readable, w as writable } from "./index.js";
-import { b as sanitize_props, aq as rest_props, ar as fallback, as as attributes, l as clsx, f as ensure_array_like, at as validate_dynamic_element_tag, au as element, d as slot, k as bind_props, F as FILENAME } from "./index4.js";
+import { b as sanitize_props, ao as rest_props, ap as fallback, aq as attributes, ar as clsx, f as ensure_array_like, as as validate_dynamic_element_tag, at as element, d as slot, au as bind_props, F as FILENAME } from "./index4.js";
 import { p as push_element, a as pop_element } from "./dev.js";
 const authApi = {
   /** Login user */
@@ -221,6 +221,5 @@ Icon.render = function() {
 };
 export {
   Icon as I,
-  authStore as a,
-  defaultAttributes as d
+  authStore as a
 };

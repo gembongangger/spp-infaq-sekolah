@@ -14,6 +14,9 @@ var is_extensible = Object.isExtensible;
 var has_own_property = Object.prototype.hasOwnProperty;
 const noop = () => {
 };
+function is_promise(value) {
+  return typeof value?.then === "function";
+}
 function run_all(arr) {
   for (var i = 0; i < arr.length; i++) {
     arr[i]();
@@ -2693,6 +2696,7 @@ function to_style(value, styles) {
   return value == null ? null : String(value);
 }
 const BLOCK_OPEN = `<!--${HYDRATION_START}-->`;
+const BLOCK_OPEN_ELSE = `<!--${HYDRATION_START_ELSE}-->`;
 const BLOCK_CLOSE = `<!--${HYDRATION_END}-->`;
 const EMPTY_COMMENT = `<!---->`;
 function validate_dynamic_element_tag(tag_fn) {
@@ -3729,6 +3733,18 @@ function bind_props(props_parent, props_now) {
     }
   }
 }
+function await_block(renderer, promise, pending_fn, then_fn) {
+  if (is_promise(promise)) {
+    renderer.push(BLOCK_OPEN);
+    promise.then(null, noop);
+    if (pending_fn !== null) {
+      pending_fn();
+    }
+  } else if (then_fn !== null) {
+    renderer.push(BLOCK_OPEN_ELSE);
+    then_fn(promise);
+  }
+}
 function ensure_array_like(array_like_or_iterator) {
   if (array_like_or_iterator) {
     return array_like_or_iterator.length !== void 0 ? array_like_or_iterator : Array.from(array_like_or_iterator);
@@ -3759,66 +3775,67 @@ function derived(fn) {
   };
 }
 export {
-  HYDRATION_START_FAILED as $,
-  source as A,
-  untrack as B,
+  EFFECT_TRANSPARENT as $,
+  increment as A,
+  queue_micro_task as B,
   COMMENT_NODE as C,
-  increment as D,
-  queue_micro_task as E,
+  active_effect as D,
+  BOUNDARY_EFFECT as E,
   FILENAME as F,
-  active_effect as G,
+  block as G,
   HYDRATION_ERROR as H,
-  BOUNDARY_EFFECT as I,
-  block as J,
-  branch as K,
-  create_text as L,
-  pause_effect as M,
-  current_batch as N,
-  move_effect as O,
-  defer_effect as P,
-  set_active_effect as Q,
-  set_active_reaction as R,
-  set_component_context as S,
-  Batch as T,
-  handle_error as U,
-  active_reaction as V,
-  component_context as W,
-  internal_set as X,
-  destroy_effect as Y,
-  invoke_error_boundary as Z,
-  svelte_boundary_reset_onerror as _,
+  branch as I,
+  create_text as J,
+  pause_effect as K,
+  current_batch as L,
+  move_effect as M,
+  defer_effect as N,
+  set_active_effect as O,
+  set_active_reaction as P,
+  set_component_context as Q,
+  Batch as R,
+  handle_error as S,
+  active_reaction as T,
+  component_context as U,
+  internal_set as V,
+  destroy_effect as W,
+  invoke_error_boundary as X,
+  svelte_boundary_reset_onerror as Y,
+  HYDRATION_START_FAILED as Z,
+  svelte_boundary_reset_noop as _,
   attr_class as a,
-  svelte_boundary_reset_noop as a0,
-  EFFECT_TRANSPARENT as a1,
-  EFFECT_PRESERVED as a2,
-  define_property as a3,
-  init_operations as a4,
-  get_first_child as a5,
-  hydration_failed as a6,
-  clear_text_content as a7,
-  STATE_SYMBOL as a8,
-  state_proxy_unmount as a9,
-  lifecycle_double_unmount as aa,
-  component_root as ab,
-  array_from as ac,
-  is_passive_event as ad,
-  push$1 as ae,
-  pop$1 as af,
-  set as ag,
-  LEGACY_PROPS as ah,
-  flushSync as ai,
-  mutable_source as aj,
-  render as ak,
-  setContext as al,
-  noop as am,
-  safe_not_equal as an,
-  ssr_context as ao,
-  set_ssr_context as ap,
-  rest_props as aq,
-  fallback as ar,
-  attributes as as,
-  validate_dynamic_element_tag as at,
-  element as au,
+  EFFECT_PRESERVED as a0,
+  define_property as a1,
+  init_operations as a2,
+  get_first_child as a3,
+  hydration_failed as a4,
+  clear_text_content as a5,
+  STATE_SYMBOL as a6,
+  state_proxy_unmount as a7,
+  lifecycle_double_unmount as a8,
+  component_root as a9,
+  array_from as aa,
+  is_passive_event as ab,
+  push$1 as ac,
+  pop$1 as ad,
+  set as ae,
+  LEGACY_PROPS as af,
+  flushSync as ag,
+  mutable_source as ah,
+  render as ai,
+  setContext as aj,
+  noop as ak,
+  safe_not_equal as al,
+  ssr_context as am,
+  set_ssr_context as an,
+  rest_props as ao,
+  fallback as ap,
+  attributes as aq,
+  clsx as ar,
+  validate_dynamic_element_tag as as,
+  element as at,
+  bind_props as au,
+  attr_style as av,
   sanitize_props as b,
   spread_props as c,
   slot as d,
@@ -3828,20 +3845,20 @@ export {
   derived as h,
   store_get as i,
   attr as j,
-  bind_props as k,
-  clsx as l,
-  attr_style as m,
-  head as n,
-  hydration_mismatch as o,
+  await_block as k,
+  head as l,
+  hydration_mismatch as m,
+  HYDRATION_END as n,
+  HYDRATION_START as o,
   prevent_snippet_stringification as p,
-  HYDRATION_END as q,
-  HYDRATION_START as r,
+  HYDRATION_START_ELSE as q,
+  get_next_sibling as r,
   stringify as s,
-  HYDRATION_START_ELSE as t,
+  tag as t,
   unsubscribe_stores as u,
-  get_next_sibling as v,
-  tag as w,
-  effect_tracking as x,
-  get as y,
-  render_effect as z
+  effect_tracking as v,
+  get as w,
+  render_effect as x,
+  source as y,
+  untrack as z
 };

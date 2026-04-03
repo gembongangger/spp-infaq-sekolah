@@ -1,10 +1,19 @@
 import { json } from "@sveltejs/kit";
 import { S as Siswa } from "../../../../../chunks/Siswa.js";
 import { a as auth } from "../../../../../chunks/index2.js";
-import * as XLSX from "xlsx";
+import * as xlsx from "xlsx";
 const POST = async ({ request, cookies }) => {
   try {
     const session = await auth.requireAuth(cookies);
+    if (session.role !== "superadmin" && !session.sekolah_id) {
+      return json(
+        {
+          success: false,
+          message: "Admin tidak memiliki sekolah aktif"
+        },
+        { status: 403 }
+      );
+    }
     const formData = await request.formData();
     const file = formData.get("file");
     if (!file) {
@@ -30,9 +39,9 @@ const POST = async ({ request, cookies }) => {
     }
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const wb = XLSX.read(buffer, { type: "buffer" });
+    const wb = xlsx.read(buffer, { type: "buffer" });
     const sheet = wb.Sheets[wb.SheetNames[0]];
-    const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+    const data = xlsx.utils.sheet_to_json(sheet, { header: 1 });
     if (data.length < 2) {
       return json(
         {

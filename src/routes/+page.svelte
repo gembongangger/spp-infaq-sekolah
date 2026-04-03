@@ -2,24 +2,38 @@
 	import { activeTab, theme, stats, transactions, students, senderSummaries, categories, apiConnected } from '$lib/stores';
 	import { loadStudents, loadTransactions, loadStats, loadSenders, loadKategori, deleteStudent, deleteTransaction } from '$lib/stores';
 	import { authStore, logout } from '$lib/auth-store';
-	import { formatRupiah, formatDate } from '$lib/utils';
 	import TabNavigation from '$lib/components/TabNavigation.svelte';
-	import StudentForm from '$lib/components/StudentForm.svelte';
-	import StudentTable from '$lib/components/StudentTable.svelte';
-	import TransactionForm from '$lib/components/TransactionForm.svelte';
-	import ProfileModal from '$lib/components/ProfileModal.svelte';
 	import AppHeader from '$lib/components/AppHeader.svelte';
-	import DashboardTab from '$lib/components/DashboardTab.svelte';
-	import ReportTab from '$lib/components/ReportTab.svelte';
-	import TransactionsTab from '$lib/components/TransactionsTab.svelte';
-	import SendersTab from '$lib/components/SendersTab.svelte';
-	import { Jenis, Metode } from '$lib/types';
 	import { onMount, tick } from 'svelte';
 	import { goto } from '$app/navigation';
+
+	const dashboardTabPromise = import('$lib/components/DashboardTab.svelte');
+	const studentFormPromise = import('$lib/components/StudentForm.svelte');
+	const studentTablePromise = import('$lib/components/StudentTable.svelte');
+	const transactionFormPromise = import('$lib/components/TransactionForm.svelte');
+	const transactionsTabPromise = import('$lib/components/TransactionsTab.svelte');
+	const sendersTabPromise = import('$lib/components/SendersTab.svelte');
+	const reportTabPromise = import('$lib/components/ReportTab.svelte');
+	const profileModalPromise = import('$lib/components/ProfileModal.svelte');
 
 	let showLogoutModal = $state(false);
 	let showProfileModal = $state(false);
 	let currentTheme = $derived($theme);
+	let dataLoaded = $state({
+		stats: false,
+		students: false,
+		transactions: false,
+		senders: false,
+		categories: false
+	});
+
+	const pendingLoads: Record<keyof typeof dataLoaded, Promise<void> | null> = {
+		stats: null,
+		students: null,
+		transactions: null,
+		senders: null,
+		categories: null
+	};
 
 	// Report filters
 	let reportKategori = $state('');
@@ -104,7 +118,79 @@
 		activeTab.set(tab);
 	}
 
+	function queueDataLoad(
+		key: keyof typeof dataLoaded,
+		loader: () => Promise<unknown>,
+		force = false
+	) {
+		if (dataLoaded[key] && !force) {
+			return Promise.resolve();
+		}
+
+		if (pendingLoads[key] && !force) {
+			return pendingLoads[key]!;
+		}
+
+		const task = (async () => {
+			await loader();
+			dataLoaded[key] = true;
+		})().finally(() => {
+			pendingLoads[key] = null;
+		});
+
+		pendingLoads[key] = task;
+		return task;
+	}
+
+	function ensureStatsLoaded(force = false) {
+		return queueDataLoad('stats', () => loadStats(), force);
+	}
+
+	function ensureStudentsLoaded(force = false) {
+		return queueDataLoad('students', () => loadStudents(), force);
+	}
+
+	function ensureTransactionsLoaded(force = false) {
+		return queueDataLoad('transactions', () => loadTransactions(), force);
+	}
+
+	function ensureSendersLoaded(force = false) {
+		return queueDataLoad('senders', () => loadSenders(), force);
+	}
+
+	function ensureCategoriesLoaded(force = false) {
+		return queueDataLoad('categories', () => loadKategori(), force);
+	}
+
+	async function ensureTabData(tab: string, force = false) {
+		switch (tab) {
+			case 'dashboard':
+				await ensureStatsLoaded(force);
+				break;
+			case 'students':
+				await ensureStudentsLoaded(force);
+				break;
+			case 'input':
+				await Promise.all([ensureStudentsLoaded(force), ensureCategoriesLoaded(force)]);
+				break;
+			case 'transactions':
+				await Promise.all([ensureTransactionsLoaded(force), ensureCategoriesLoaded(force)]);
+				break;
+			case 'senders':
+				await Promise.all([ensureStudentsLoaded(force), ensureTransactionsLoaded(force)]);
+				break;
+			case 'reports':
+				await Promise.all([
+					ensureTransactionsLoaded(force),
+					ensureCategoriesLoaded(force),
+					ensureSendersLoaded(force)
+				]);
+				break;
+		}
+	}
+
 	async function handleEditStudent(student: any) {
+		await ensureTabData('students');
 		activeTab.set('students');
 		await tick();
 		let attempts = 0;
@@ -124,6 +210,7 @@
 	}
 
 	async function handleEditTransaction(transaction: any) {
+		await ensureTabData('input');
 		activeTab.set('input');
 		await tick();
 		let attempts = 0;
@@ -166,13 +253,15 @@
 			goto('/login');
 			return;
 		}
-		await Promise.all([
-			loadStats(),
-			loadStudents(),
-			loadTransactions(),
-			loadSenders(),
-			loadKategori()
-		]);
+
+		await ensureTabData($activeTab || 'dashboard');
+	});
+
+	$effect(() => {
+		if (!$authStore.isAuthenticated) return;
+
+		const currentTab = $activeTab;
+		void ensureTabData(currentTab);
 	});
 </script>
 
@@ -209,74 +298,95 @@
 	<TabNavigation />
 
 	{#if $activeTab === 'dashboard'}
-		<DashboardTab stats={currentStats} />
+		{#await dashboardTabPromise then module}
+			{@const DashboardTab = module.default}
+			<DashboardTab stats={currentStats} />
+		{/await}
 	{/if}
 
 	{#if $activeTab === 'students'}
 		<div class="fade-in">
-			<StudentForm bind:this={studentForm} />
-			<StudentTable onEdit={handleEditStudent} />
+			{#await studentFormPromise then module}
+				{@const StudentForm = module.default}
+				<StudentForm bind:this={studentForm} />
+			{/await}
+			{#await studentTablePromise then module}
+				{@const StudentTable = module.default}
+				<StudentTable onEdit={handleEditStudent} />
+			{/await}
 		</div>
 	{/if}
 
 	{#if $activeTab === 'input'}
 		<div class="fade-in">
-			<TransactionForm bind:this={transactionForm} />
+			{#await transactionFormPromise then module}
+				{@const TransactionForm = module.default}
+				<TransactionForm bind:this={transactionForm} />
+			{/await}
 		</div>
 	{/if}
 
 	{#if $activeTab === 'transactions'}
-		<TransactionsTab
-			transactions={$transactions}
-			filteredTransactions={filteredTransactions}
-			categories={$categories.map(c => c.nama)}
-			filterKategori={filterKategori}
-			filterTanggalMulai={filterTanggalMulai}
-			filterTanggalSelesai={filterTanggalSelesai}
-			onFilterKategoriChange={(v) => filterKategori = v}
-			onFilterTanggalMulaiChange={(v) => filterTanggalMulai = v}
-			onFilterTanggalSelesaiChange={(v) => filterTanggalSelesai = v}
-			onResetFilter={resetFilter}
-			onEditTransaction={handleEditTransaction}
-			onDeleteTransaction={(id) => deleteTransaction(id)}
-			{currentTheme}
-		/>
+		{#await transactionsTabPromise then module}
+			{@const TransactionsTab = module.default}
+			<TransactionsTab
+				transactions={$transactions}
+				filteredTransactions={filteredTransactions}
+				categories={$categories.map(c => c.nama)}
+				filterKategori={filterKategori}
+				filterTanggalMulai={filterTanggalMulai}
+				filterTanggalSelesai={filterTanggalSelesai}
+				onFilterKategoriChange={(v) => filterKategori = v}
+				onFilterTanggalMulaiChange={(v) => filterTanggalMulai = v}
+				onFilterTanggalSelesaiChange={(v) => filterTanggalSelesai = v}
+				onResetFilter={resetFilter}
+				onEditTransaction={handleEditTransaction}
+				onDeleteTransaction={(id) => deleteTransaction(id)}
+				{currentTheme}
+			/>
+		{/await}
 	{/if}
 
 	{#if $activeTab === 'senders'}
-		<SendersTab
-			students={$students}
-			transactions={$transactions}
-			onEditSender={handleEditSender}
-			{currentTheme}
-		/>
+		{#await sendersTabPromise then module}
+			{@const SendersTab = module.default}
+			<SendersTab
+				students={$students}
+				transactions={$transactions}
+				onEditSender={handleEditSender}
+				{currentTheme}
+			/>
+		{/await}
 	{/if}
 
 	{#if $activeTab === 'reports'}
-		<ReportTab
-			transactions={$transactions}
-			filteredTransactions={reportFilteredTransactions}
-			categories={$categories.map(c => c.nama)}
-			names={Array.from(new Set(allSenderSummaries.map(s => s.nama)))}
-			classes={Array.from(new Set(allSenderSummaries.map(s => s.kelas))).sort()}
-			methods={['tunai', 'transfer']}
-			filterKategori={reportKategori}
-			filterNama={reportNama}
-			filterKelas={reportKelas}
-			filterMetode={reportMetode}
-			filterTanggalMulai={reportTanggalMulai}
-			filterTanggalSelesai={reportTanggalSelesai}
-			onFilterKategoriChange={(v) => reportKategori = v}
-			onFilterNamaChange={(v) => reportNama = v}
-			onFilterKelasChange={(v) => reportKelas = v}
-			onFilterMetodeChange={(v) => reportMetode = v}
-			onFilterTanggalMulaiChange={(v) => reportTanggalMulai = v}
-			onFilterTanggalSelesaiChange={(v) => reportTanggalSelesai = v}
-			onPreviewReport={handlePreviewReport}
-			onDownloadPDF={handleDownloadPDF}
-			onResetFilters={resetFilters}
-			{currentTheme}
-		/>
+		{#await reportTabPromise then module}
+			{@const ReportTab = module.default}
+			<ReportTab
+				transactions={$transactions}
+				filteredTransactions={reportFilteredTransactions}
+				categories={$categories.map(c => c.nama)}
+				names={Array.from(new Set(allSenderSummaries.map(s => s.nama)))}
+				classes={Array.from(new Set(allSenderSummaries.map(s => s.kelas))).sort()}
+				methods={['tunai', 'transfer']}
+				filterKategori={reportKategori}
+				filterNama={reportNama}
+				filterKelas={reportKelas}
+				filterMetode={reportMetode}
+				filterTanggalMulai={reportTanggalMulai}
+				filterTanggalSelesai={reportTanggalSelesai}
+				onFilterKategoriChange={(v) => reportKategori = v}
+				onFilterNamaChange={(v) => reportNama = v}
+				onFilterKelasChange={(v) => reportKelas = v}
+				onFilterMetodeChange={(v) => reportMetode = v}
+				onFilterTanggalMulaiChange={(v) => reportTanggalMulai = v}
+				onFilterTanggalSelesaiChange={(v) => reportTanggalSelesai = v}
+				onPreviewReport={handlePreviewReport}
+				onDownloadPDF={handleDownloadPDF}
+				onResetFilters={resetFilters}
+				{currentTheme}
+			/>
+		{/await}
 	{/if}
 </div>
 
@@ -316,7 +426,10 @@
 {/if}
 
 <!-- Profile Modal -->
-<ProfileModal isOpen={showProfileModal} onClose={() => showProfileModal = false} />
+{#await profileModalPromise then module}
+	{@const ProfileModal = module.default}
+	<ProfileModal isOpen={showProfileModal} onClose={() => showProfileModal = false} />
+{/await}
 
 <style>
 	.fade-in {

@@ -1,10 +1,13 @@
-import { n as head, a as attr_class, s as stringify, j as attr, e as escape_html, f as ensure_array_like, h as derived, F as FILENAME } from "../../../chunks/index4.js";
+import { l as head, a as attr_class, s as stringify, j as attr, e as escape_html, f as ensure_array_like, h as derived, F as FILENAME } from "../../../chunks/index4.js";
 import "../../../chunks/Icon.js";
 import "../../../chunks/stores.js";
-import { S as Search, f as formatRupiah, H as History, U as User } from "../../../chunks/user2.js";
+import { f as formatRupiah } from "../../../chunks/utils2.js";
 import { p as push_element, a as pop_element } from "../../../chunks/dev.js";
 import "../../../chunks/client.js";
 import { A as Arrow_left } from "../../../chunks/arrow-left.js";
+import { S as Search } from "../../../chunks/search.js";
+import { H as History } from "../../../chunks/history.js";
+import { U as User } from "../../../chunks/user2.js";
 _page[FILENAME] = "src/routes/pengirim/+page.svelte";
 function _page($$renderer, $$props) {
   $$renderer.component(

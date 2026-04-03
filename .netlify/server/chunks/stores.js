@@ -1,4 +1,4 @@
-import { w as writable, r as readable } from "./index.js";
+import { r as readable, w as writable } from "./index.js";
 async function fetchApi(endpoint, options) {
   const url = `/api${endpoint}`;
   const response = await fetch(url, {
@@ -14,6 +14,88 @@ async function fetchApi(endpoint, options) {
   }
   return data;
 }
+async function fetchBlob(endpoint, options) {
+  const url = `/api${endpoint}`;
+  const response = await fetch(url, {
+    ...options
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.message || `API Error: ${response.status}`);
+  }
+  return await response.blob();
+}
+const siswaApi = {
+  /** Get all siswa */
+  getAll: async () => {
+    const response = await fetchApi("/siswa");
+    return response.data;
+  },
+  /** Search siswa with pagination */
+  search: async (options) => {
+    const params = new URLSearchParams();
+    if (options.query) params.set("q", options.query);
+    if (options.page) params.set("page", options.page.toString());
+    if (options.limit) params.set("limit", options.limit.toString());
+    const response = await fetchApi(`/siswa/search?${params.toString()}`);
+    return {
+      data: response.data,
+      pagination: response.pagination
+    };
+  },
+  /** Get siswa by ID */
+  getById: async (id) => {
+    const response = await fetchApi(`/siswa/${id}`);
+    return response.data;
+  },
+  /** Create new siswa */
+  create: async (data) => {
+    const response = await fetchApi("/siswa", {
+      method: "POST",
+      body: JSON.stringify(data)
+    });
+    return response.data;
+  },
+  /** Update siswa */
+  update: async (id, data) => {
+    const response = await fetchApi(`/siswa/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data)
+    });
+    return response.data;
+  },
+  /** Delete siswa */
+  delete: async (id) => {
+    await fetchApi(`/siswa/${id}`, { method: "DELETE" });
+  },
+  /** Upload Excel file */
+  uploadExcel: async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const url = `/api/siswa/upload-excel`;
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData
+    });
+    const text = await response.text();
+    let data;
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch (parseError) {
+      throw new Error(
+        `Upload Excel gagal: response tidak valid JSON (status ${response.status}). Response body: ${text.substring(0, 300)}`
+      );
+    }
+    if (!response.ok) {
+      throw new Error(data?.message || `API Error: ${response.status}`);
+    }
+    return data.data;
+  },
+  /** Download template Excel */
+  downloadTemplate: async () => {
+    return await fetchBlob("/siswa/download-template");
+  }
+};
 const transaksiApi = {
   /** Get all transaksi with optional filters */
   getAll: async (filters) => {
@@ -66,6 +148,25 @@ const transaksiApi = {
     return response.data;
   }
 };
+const kategoriApi = {
+  /** Get all kategori */
+  getAll: async () => {
+    const response = await fetchApi("/kategori");
+    return response.data;
+  },
+  /** Create new kategori */
+  create: async (data) => {
+    const response = await fetchApi("/kategori", {
+      method: "POST",
+      body: JSON.stringify(data)
+    });
+    return response.data;
+  },
+  /** Delete kategori */
+  delete: async (id) => {
+    await fetchApi(`/kategori/${id}`, { method: "DELETE" });
+  }
+};
 const healthCheck = async () => {
   try {
     const response = await fetchApi("/health");
@@ -91,8 +192,44 @@ readable(false, (set) => {
   return () => clearInterval(interval);
 });
 const students = writable([]);
+const studentsLoading = writable(false);
+const studentsError = writable(null);
+async function loadStudents() {
+  studentsLoading.set(true);
+  studentsError.set(null);
+  try {
+    const data = await siswaApi.getAll();
+    students.set(data);
+  } catch (error) {
+    studentsError.set(error instanceof Error ? error.message : "Failed to load students");
+  } finally {
+    studentsLoading.set(false);
+  }
+}
 const transactions = writable([]);
+const transactionsLoading = writable(false);
+const transactionsError = writable(null);
+async function loadTransactions(filters) {
+  transactionsLoading.set(true);
+  transactionsError.set(null);
+  try {
+    const data = await transaksiApi.getAll(filters);
+    transactions.set(data);
+  } catch (error) {
+    transactionsError.set(error instanceof Error ? error.message : "Failed to load transactions");
+  } finally {
+    transactionsLoading.set(false);
+  }
+}
 const categories = writable([]);
+async function loadKategori() {
+  try {
+    const data = await kategoriApi.getAll();
+    categories.set(data);
+  } catch (error) {
+    console.error("Failed to load categories:", error);
+  }
+}
 const stats = writable({
   totalInfaq: 0,
   totalJariyah: 0,
@@ -134,12 +271,17 @@ async function deleteTransaction(id) {
 }
 export {
   activeTab as a,
-  transactions as b,
+  apiConnected as b,
   categories as c,
-  stats as d,
-  senderSummaries as e,
-  apiConnected as f,
-  deleteTransaction as g,
+  deleteTransaction as d,
+  transactions as e,
+  stats as f,
+  senderSummaries as g,
+  loadStudents as h,
+  loadTransactions as i,
+  loadSenders as j,
+  loadKategori as k,
+  loadStats as l,
   students as s,
   theme as t
 };

@@ -1,1 +1,0 @@
-import{e as y,g as u,H as _,E as g,h as t,C as o,i,s as l,j as d,k as m,m as p}from"./xPGfv2e1.js";function C(n,r){let s=null,E=t;var a;if(t){s=m;for(var e=p(document.head);e!==null&&(e.nodeType!==o||e.data!==n);)e=i(e);if(e===null)l(!1);else{var f=i(e);e.remove(),d(f)}}t||(a=document.head.appendChild(y()));try{u(()=>r(a),_|g)}finally{E&&(l(!0),d(s))}}export{C as h};

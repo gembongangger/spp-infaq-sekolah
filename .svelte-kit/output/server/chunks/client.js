@@ -5,7 +5,7 @@ import "./utils.js";
 import { w as writable } from "./index.js";
 import "@sveltejs/kit/internal/server";
 import "./root.js";
-import { am as noop } from "./index4.js";
+import { ak as noop } from "./index4.js";
 function create_updated_store() {
   const { set, subscribe } = writable(false);
   {

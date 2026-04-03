@@ -4,7 +4,6 @@
 	import { siswaApi } from '$lib/api';
 	import { transactions as transactionsStore } from '$lib/stores';
 	import type { TransaksiData } from '$lib/types';
-	import * as XLSX from 'xlsx';
 
 	interface Student {
 		id: string;
@@ -75,11 +74,6 @@
 			const statsMap = new Map();
 			const txs = effectiveTransactions;
 			
-			console.log('[SendersTab] Transactions count:', txs.length);
-			console.log('[SendersTab] Raw students count:', rawStudents.length);
-			console.log('[SendersTab] First transaction sample:', txs[0]);
-			console.log('[SendersTab] First student sample:', rawStudents[0]);
-			
 			if (txs.length > 0 && rawStudents.length > 0) {
 				// Build stats map keyed by nomorAkun AND by namaPengirim for fallback
 				for (const t of txs) {
@@ -105,10 +99,6 @@
 					}
 				}
 				
-				console.log('[SendersTab] Stats map size:', statsMap.size);
-				console.log('[SendersTab] Stats map keys:', Array.from(statsMap.keys()).slice(0, 5));
-				console.log('[SendersTab] Sample stats:', Array.from(statsMap.entries()).slice(0, 3));
-
 				// Merge with stats - try matching by nomorAkun first, then by nama (case-insensitive)
 				studentsWithStats = rawStudents.map(s => {
 					// Try nomorAkun first (normalized)
@@ -128,16 +118,9 @@
 						totalDonasi: stats?.totalDonasi || 0,
 						totalTransaksi: stats?.totalTransaksi || 0
 					};
-					// Log if student has transactions
-					if (stats && stats.totalTransaksi > 0) {
-						console.log('[SendersTab] ✅ Student with stats:', s.nama, s.nomorAkun, stats);
-					} else {
-						console.log('[SendersTab] ❌ Student without stats:', s.nama, s.nomorAkun);
-					}
 					return result;
 				});
 			} else {
-				console.log('[SendersTab] No transactions or students, using zero stats');
 				studentsWithStats = rawStudents.map(s => ({
 					...s,
 					totalInfaq: 0,
@@ -146,8 +129,6 @@
 					totalTransaksi: 0
 				}));
 			}
-			console.log('[SendersTab] Final studentsWithStats:', studentsWithStats.length);
-			console.log('[SendersTab] Students with non-zero stats:', studentsWithStats.filter(s => s.totalInfaq > 0 || s.totalJariyah > 0).length);
 		} catch (error) {
 			console.error('Failed to search students:', error);
 			studentsWithStats = [];
@@ -234,11 +215,13 @@
 		searchQuery = '';
 	}
 
-	function exportHistoryToExcel() {
+	async function exportHistoryToExcel() {
 		if (!selectedStudent || studentTransactions.length === 0) {
 			alert('Tidak ada data untuk di-export');
 			return;
 		}
+
+		const XLSX = await import('xlsx');
 
 		const data = studentTransactions.map((t) => ({
 			Tanggal: formatDate(t.tanggal),

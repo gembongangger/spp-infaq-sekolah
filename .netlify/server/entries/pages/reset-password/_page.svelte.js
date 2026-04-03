@@ -1,4 +1,4 @@
-import { n as head, j as attr, F as FILENAME } from "../../../chunks/index4.js";
+import { l as head, j as attr, F as FILENAME } from "../../../chunks/index4.js";
 import "../../../chunks/Icon.js";
 import "../../../chunks/client.js";
 import { A as Arrow_left } from "../../../chunks/arrow-left.js";

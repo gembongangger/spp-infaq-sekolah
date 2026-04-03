@@ -1,4 +1,4 @@
-import { ao as ssr_context, F as FILENAME, ap as set_ssr_context } from "./index4.js";
+import { am as ssr_context, F as FILENAME, an as set_ssr_context } from "./index4.js";
 import "clsx";
 const autoclosing_children = {
   // based on http://developers.whatwg.org/syntax.html#syntax-tag-omission

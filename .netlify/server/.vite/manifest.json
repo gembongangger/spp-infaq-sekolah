@@ -54,6 +54,36 @@
       "src/lib/server/db/index.ts"
     ]
   },
+  "__page.Ctt3TUqp.css": {
+    "file": "_app/immutable/assets/_page.Ctt3TUqp.css",
+    "src": "__page.Ctt3TUqp.css"
+  },
+  "__page.js": {
+    "file": "chunks/_page.js",
+    "name": "_page",
+    "imports": [
+      "_index4.js",
+      "_stores.js",
+      "_Icon.js",
+      "_users.js",
+      "_dev.js",
+      "_heart-handshake.js",
+      "_client.js"
+    ],
+    "dynamicImports": [
+      "src/lib/components/DashboardTab.svelte",
+      "src/lib/components/StudentForm.svelte",
+      "src/lib/components/StudentTable.svelte",
+      "src/lib/components/TransactionForm.svelte",
+      "src/lib/components/TransactionsTab.svelte",
+      "src/lib/components/SendersTab.svelte",
+      "src/lib/components/ReportTab.svelte",
+      "src/lib/components/ProfileModal.svelte"
+    ],
+    "css": [
+      "_app/immutable/assets/_page.Ctt3TUqp.css"
+    ]
+  },
   "_arrow-left.js": {
     "file": "chunks/arrow-left.js",
     "name": "arrow-left",
@@ -80,6 +110,14 @@
       "_index4.js"
     ]
   },
+  "_download.js": {
+    "file": "chunks/download.js",
+    "name": "download",
+    "imports": [
+      "_index4.js",
+      "_Icon.js"
+    ]
+  },
   "_environment.js": {
     "file": "chunks/environment.js",
     "name": "environment"
@@ -88,9 +126,25 @@
     "file": "chunks/exports.js",
     "name": "exports"
   },
+  "_eye.js": {
+    "file": "chunks/eye.js",
+    "name": "eye",
+    "imports": [
+      "_index4.js",
+      "_Icon.js"
+    ]
+  },
   "_heart-handshake.js": {
     "file": "chunks/heart-handshake.js",
     "name": "heart-handshake",
+    "imports": [
+      "_index4.js",
+      "_Icon.js"
+    ]
+  },
+  "_history.js": {
+    "file": "chunks/history.js",
+    "name": "history",
     "imports": [
       "_index4.js",
       "_Icon.js"
@@ -144,11 +198,35 @@
       "_Icon.js"
     ]
   },
+  "_pen.js": {
+    "file": "chunks/pen.js",
+    "name": "pen",
+    "imports": [
+      "_index4.js",
+      "_Icon.js"
+    ]
+  },
+  "_plus.js": {
+    "file": "chunks/plus.js",
+    "name": "plus",
+    "imports": [
+      "_index4.js",
+      "_Icon.js"
+    ]
+  },
   "_root.js": {
     "file": "chunks/root.js",
     "name": "root",
     "imports": [
       "_index4.js"
+    ]
+  },
+  "_search.js": {
+    "file": "chunks/search.js",
+    "name": "search",
+    "imports": [
+      "_index4.js",
+      "_Icon.js"
     ]
   },
   "_shared.js": {
@@ -174,6 +252,14 @@
       "_index.js"
     ]
   },
+  "_trash-2.js": {
+    "file": "chunks/trash-2.js",
+    "name": "trash-2",
+    "imports": [
+      "_index4.js",
+      "_Icon.js"
+    ]
+  },
   "_true.js": {
     "file": "chunks/true.js",
     "name": "true"
@@ -197,6 +283,18 @@
   "_utils.js": {
     "file": "chunks/utils.js",
     "name": "utils"
+  },
+  "_utils2.js": {
+    "file": "chunks/utils2.js",
+    "name": "utils"
+  },
+  "_x.js": {
+    "file": "chunks/x.js",
+    "name": "x",
+    "imports": [
+      "_index4.js",
+      "_Icon.js"
+    ]
   },
   "node_modules/@sveltejs/kit/src/runtime/app/server/remote/index.js": {
     "file": "remote-entry.js",
@@ -245,6 +343,131 @@
       "src/lib/server/db/index.ts"
     ]
   },
+  "src/lib/components/DashboardTab.svelte": {
+    "file": "chunks/DashboardTab.js",
+    "name": "DashboardTab",
+    "src": "src/lib/components/DashboardTab.svelte",
+    "isDynamicEntry": true,
+    "imports": [
+      "_index4.js",
+      "_dev.js",
+      "_utils2.js",
+      "_stores.js",
+      "_Icon.js"
+    ],
+    "css": [
+      "_app/immutable/assets/DashboardTab.Dp94q1fq.css"
+    ]
+  },
+  "src/lib/components/ProfileModal.svelte": {
+    "file": "chunks/ProfileModal.js",
+    "name": "ProfileModal",
+    "src": "src/lib/components/ProfileModal.svelte",
+    "isDynamicEntry": true,
+    "imports": [
+      "_index4.js",
+      "_Icon.js",
+      "_x.js",
+      "_user2.js",
+      "_mail.js",
+      "_dev.js"
+    ]
+  },
+  "src/lib/components/ReportTab.svelte": {
+    "file": "chunks/ReportTab.js",
+    "name": "ReportTab",
+    "src": "src/lib/components/ReportTab.svelte",
+    "isDynamicEntry": true,
+    "imports": [
+      "_index4.js",
+      "_utils2.js",
+      "_history.js",
+      "_eye.js",
+      "_download.js",
+      "_Icon.js",
+      "_dev.js"
+    ]
+  },
+  "src/lib/components/SendersTab.svelte": {
+    "file": "chunks/SendersTab.js",
+    "name": "SendersTab",
+    "src": "src/lib/components/SendersTab.svelte",
+    "isDynamicEntry": true,
+    "imports": [
+      "_index4.js",
+      "_utils2.js",
+      "_stores.js",
+      "_history.js",
+      "_pen.js",
+      "_Icon.js",
+      "_dev.js"
+    ]
+  },
+  "src/lib/components/StudentForm.svelte": {
+    "file": "chunks/StudentForm.js",
+    "name": "StudentForm",
+    "src": "src/lib/components/StudentForm.svelte",
+    "isDynamicEntry": true,
+    "imports": [
+      "_index4.js",
+      "_stores.js",
+      "_download.js",
+      "_Icon.js",
+      "__page.js",
+      "_x.js",
+      "_pen.js",
+      "_dev.js"
+    ]
+  },
+  "src/lib/components/StudentTable.svelte": {
+    "file": "chunks/StudentTable.js",
+    "name": "StudentTable",
+    "src": "src/lib/components/StudentTable.svelte",
+    "isDynamicEntry": true,
+    "imports": [
+      "_index4.js",
+      "_stores.js",
+      "_pen.js",
+      "_trash-2.js",
+      "_users.js",
+      "_dev.js"
+    ]
+  },
+  "src/lib/components/TransactionForm.svelte": {
+    "file": "chunks/TransactionForm.js",
+    "name": "TransactionForm",
+    "src": "src/lib/components/TransactionForm.svelte",
+    "isDynamicEntry": true,
+    "imports": [
+      "_index4.js",
+      "_stores.js",
+      "_plus.js",
+      "__page.js",
+      "_search.js",
+      "_x.js",
+      "_pen.js",
+      "_dev.js"
+    ],
+    "css": [
+      "_app/immutable/assets/TransactionForm.CYdqCLLV.css"
+    ]
+  },
+  "src/lib/components/TransactionsTab.svelte": {
+    "file": "chunks/TransactionsTab.js",
+    "name": "TransactionsTab",
+    "src": "src/lib/components/TransactionsTab.svelte",
+    "isDynamicEntry": true,
+    "imports": [
+      "_index4.js",
+      "_utils2.js",
+      "__page.js",
+      "_Icon.js",
+      "_download.js",
+      "_pen.js",
+      "_trash-2.js",
+      "_dev.js"
+    ]
+  },
   "src/lib/server/db/index.ts": {
     "file": "chunks/index3.js",
     "name": "index",
@@ -262,7 +485,7 @@
       "_dev.js"
     ],
     "css": [
-      "_app/immutable/assets/_layout.9fcnSB2l.css"
+      "_app/immutable/assets/_layout.CCi6y3T6.css"
     ]
   },
   "src/routes/+page.svelte": {
@@ -274,18 +497,9 @@
       "_index4.js",
       "_stores.js",
       "_Icon.js",
-      "_users.js",
-      "_dev.js",
-      "_user2.js",
-      "_mail.js",
-      "_heart-handshake.js",
-      "_arrow-left.js",
-      "_lock.js",
-      "_shield.js",
-      "_client.js"
-    ],
-    "css": [
-      "_app/immutable/assets/_page.C4wa26Bi.css"
+      "__page.js",
+      "_client.js",
+      "_dev.js"
     ]
   },
   "src/routes/api/admin/profile/+server.ts": {
@@ -521,6 +735,7 @@
       "_heart-handshake.js",
       "_mail.js",
       "_lock.js",
+      "_eye.js",
       "_dev.js"
     ],
     "css": [
@@ -536,10 +751,13 @@
       "_index4.js",
       "_Icon.js",
       "_stores.js",
-      "_user2.js",
+      "_utils2.js",
       "_dev.js",
       "_client.js",
-      "_arrow-left.js"
+      "_arrow-left.js",
+      "_search.js",
+      "_history.js",
+      "_user2.js"
     ],
     "css": [
       "_app/immutable/assets/_page.DSzugseJ.css"
@@ -572,8 +790,9 @@
       "_Icon.js",
       "_client.js",
       "_dev.js",
-      "_users.js",
-      "_shield.js"
+      "_plus.js",
+      "_shield.js",
+      "_users.js"
     ],
     "css": [
       "_app/immutable/assets/_page.KrfumMBl.css"
@@ -591,6 +810,7 @@
       "_shield.js",
       "_mail.js",
       "_lock.js",
+      "_eye.js",
       "_dev.js"
     ],
     "css": [

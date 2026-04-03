@@ -2,7 +2,6 @@
 	import { Download, Eye, History, FileSpreadsheet } from 'lucide-svelte';
 	import { formatRupiah, formatDate } from '$lib/utils';
 	import type { TransaksiData } from '$lib/types';
-	import * as XLSX from 'xlsx';
 
 	interface Props {
 		transactions: TransaksiData[];
@@ -80,11 +79,13 @@
 		.filter(t => t.jenis === 'keluar')
 		.reduce((sum, t) => sum + t.jumlah, 0));
 
-	function exportToExcel() {
+	async function exportToExcel() {
 		if (filteredTransactions.length === 0) {
 			alert('Tidak ada data untuk di-export');
 			return;
 		}
+
+		const XLSX = await import('xlsx');
 
 		const data = filteredTransactions.map((t) => ({
 			Tanggal: formatDate(t.tanggal),

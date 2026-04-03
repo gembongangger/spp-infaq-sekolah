@@ -2,7 +2,6 @@
 	import { List, Edit2, Trash2, ChevronLeft, ChevronRight, Download } from 'lucide-svelte';
 	import { formatRupiah, formatDate } from '$lib/utils';
 	import type { TransaksiData } from '$lib/types';
-	import * as XLSX from 'xlsx';
 
 	interface Props {
 		transactions: TransaksiData[];
@@ -66,11 +65,13 @@
 	const tableRowBorder = $derived(currentTheme === 'dark' ? 'border-[#1e293b]' : 'border-slate-100');
 	const tableRowHover = $derived(currentTheme === 'dark' ? 'hover:bg-[#334155]/30' : 'hover:bg-slate-50');
 
-	function exportToExcel() {
+	async function exportToExcel() {
 		if (filteredTransactions.length === 0) {
 			alert('Tidak ada data untuk di-export');
 			return;
 		}
+
+		const XLSX = await import('xlsx');
 
 		const data = filteredTransactions.map((t) => ({
 			Tanggal: formatDate(t.tanggal),

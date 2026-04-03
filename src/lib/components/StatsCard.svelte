@@ -1,22 +1,19 @@
 <script lang="ts">
 	import type { Component } from 'svelte';
-	import * as Lucide from 'lucide-svelte';
 	import { formatRupiah } from '$lib/utils';
 	import { theme } from '$lib/stores';
 
 	interface Props {
 		label: string;
 		value: number;
-		icon: keyof typeof Lucide;
+		icon: Component<{ size?: number; color?: string }>;
 		color: string;
 		borderColor: string;
 		bgColor: string;
 	}
 
-	let { label, value, icon, color, borderColor, bgColor }: Props = $props();
+	let { label, value, icon: Icon, color, borderColor, bgColor }: Props = $props();
 	let currentTheme = $derived($theme);
-
-	let Icon = $derived(Lucide[icon] as unknown as Component<{ size?: number; color?: string }>);
 </script>
 
 <div
