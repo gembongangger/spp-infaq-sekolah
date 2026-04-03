@@ -15,12 +15,12 @@ const auth = {
     });
   },
   /** Get session from cookies */
-  getSession(cookies) {
+  async getSession(cookies) {
     const userId = cookies.get(SESSION_COOKIE);
     if (!userId) {
       return null;
     }
-    const user = User.findById(userId);
+    const user = await User.findById(userId);
     if (!user) {
       return null;
     }
@@ -38,12 +38,12 @@ const auth = {
     });
   },
   /** Check if user is authenticated */
-  isAuthenticated(cookies) {
-    return this.getSession(cookies) !== null;
+  async isAuthenticated(cookies) {
+    return await this.getSession(cookies) !== null;
   },
   /** Require authentication, throw error if not authenticated */
-  requireAuth(cookies) {
-    const session = this.getSession(cookies);
+  async requireAuth(cookies) {
+    const session = await this.getSession(cookies);
     if (!session) {
       throw new Error("Not authenticated");
     }

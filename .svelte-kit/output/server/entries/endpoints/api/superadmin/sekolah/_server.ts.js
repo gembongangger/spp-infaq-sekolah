@@ -3,7 +3,7 @@ import { S as Sekolah } from "../../../../../chunks/Sekolah.js";
 import { a as auth } from "../../../../../chunks/index2.js";
 const GET = async ({ cookies }) => {
   try {
-    const session = auth.requireAuth(cookies);
+    const session = await auth.requireAuth(cookies);
     if (session.role !== "superadmin") {
       return json(
         { success: false, message: "Akses ditolak. Hanya superadmin yang dapat mengakses." },
@@ -31,7 +31,7 @@ const GET = async ({ cookies }) => {
 };
 const POST = async ({ request, cookies }) => {
   try {
-    const session = auth.requireAuth(cookies);
+    const session = await auth.requireAuth(cookies);
     if (session.role !== "superadmin") {
       return json(
         { success: false, message: "Akses ditolak. Hanya superadmin yang dapat mengakses." },

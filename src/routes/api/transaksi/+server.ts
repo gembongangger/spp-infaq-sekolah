@@ -5,9 +5,12 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { Transaksi, type TransaksiFilters } from '$lib/server/models/Transaksi';
+import { auth } from '$lib/server/auth';
+import { Siswa } from '$lib/server/models/Siswa';
 
-export const GET: RequestHandler = async ({ url }) => {
+export const GET: RequestHandler = async ({ url, cookies }) => {
 	try {
+		const session = await auth.requireAuth(cookies);
 		const filters: TransaksiFilters = {};
 
 		if (url.searchParams.has('kategori')) {
@@ -29,7 +32,15 @@ export const GET: RequestHandler = async ({ url }) => {
 			filters.limit = parseInt(url.searchParams.get('limit') || '0', 10);
 		}
 
-		const transaksiList = await Transaksi.getAll(filters);
+		const sekolahId =
+			session.role === 'superadmin'
+				? url.searchParams.get('sekolah_id') || undefined
+				: session.sekolah_id || undefined;
+
+		const transaksiList = await Transaksi.getAll({
+			...filters,
+			sekolahId
+		});
 
 		return json(
 			{
@@ -49,8 +60,9 @@ export const GET: RequestHandler = async ({ url }) => {
 	}
 };
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
+		const session = await auth.requireAuth(cookies);
 		const data = await request.json();
 
 		// Validate required fields
@@ -74,6 +86,46 @@ export const POST: RequestHandler = async ({ request }) => {
 			tanggal = new Date(tanggal).toISOString().split('T')[0];
 		}
 
+		let sekolahId =
+			session.role === 'superadmin'
+				? data.sekolahId || data.sekolah_id || null
+				: session.sekolah_id;
+
+		if (data.siswaId) {
+			const siswa = await Siswa.findById(data.siswaId);
+			if (!siswa) {
+				return json(
+					{
+						success: false,
+						message: 'Siswa tidak ditemukan',
+					},
+					{ status: 404 }
+				);
+			}
+
+			if (session.role !== 'superadmin' && siswa.sekolah_id !== session.sekolah_id) {
+				return json(
+					{
+						success: false,
+						message: 'Akses ditolak untuk siswa dari sekolah lain',
+					},
+					{ status: 403 }
+				);
+			}
+
+			sekolahId = sekolahId || siswa.sekolah_id || null;
+		}
+
+		if (session.role !== 'superadmin' && !sekolahId) {
+			return json(
+				{
+					success: false,
+					message: 'Admin tidak memiliki sekolah aktif',
+				},
+				{ status: 403 }
+			);
+		}
+
 		const transaksi = await Transaksi.create({
 			tanggal,
 			keterangan: data.keterangan,
@@ -86,6 +138,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			kelasPengirim: data.kelasPengirim || null,
 			nomorAkun: data.nomorAkun || null,
 			bulan: data.bulan || null,
+			sekolah_id: sekolahId,
 		});
 
 		return json(

@@ -16,6 +16,7 @@ export interface SessionData {
 	username: string;
 	email: string;
 	role: string;
+	sekolah_id: string | null;
 }
 
 export const auth = {
@@ -48,6 +49,7 @@ export const auth = {
 			username: user.username,
 			email: user.email,
 			role: user.role,
+			sekolah_id: user.sekolah_id || null,
 		};
 	},
 

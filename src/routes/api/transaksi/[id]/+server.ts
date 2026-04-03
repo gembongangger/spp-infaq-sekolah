@@ -6,9 +6,20 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { Transaksi } from '$lib/server/models/Transaksi';
+import { auth } from '$lib/server/auth';
+import { Siswa } from '$lib/server/models/Siswa';
 
-export const GET: RequestHandler = async ({ params }) => {
+function canAccessTransaksi(
+	role: string,
+	sessionSekolahId: string | null,
+	transaksiSekolahId: string | null
+) {
+	return role === 'superadmin' || sessionSekolahId === transaksiSekolahId;
+}
+
+export const GET: RequestHandler = async ({ params, cookies }) => {
 	try {
+		const session = await auth.requireAuth(cookies);
 		const transaksi = await Transaksi.findById(params.id);
 
 		if (!transaksi) {
@@ -18,6 +29,16 @@ export const GET: RequestHandler = async ({ params }) => {
 					message: 'Transaksi not found',
 				},
 				{ status: 404 }
+			);
+		}
+
+		if (!canAccessTransaksi(session.role, session.sekolah_id, transaksi.sekolah_id || null)) {
+			return json(
+				{
+					success: false,
+					message: 'Akses ditolak',
+				},
+				{ status: 403 }
 			);
 		}
 
@@ -39,8 +60,9 @@ export const GET: RequestHandler = async ({ params }) => {
 	}
 };
 
-export const PUT: RequestHandler = async ({ params, request }) => {
+export const PUT: RequestHandler = async ({ params, request, cookies }) => {
 	try {
+		const session = await auth.requireAuth(cookies);
 		const transaksi = await Transaksi.findById(params.id);
 
 		if (!transaksi) {
@@ -50,6 +72,16 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 					message: 'Transaksi not found',
 				},
 				{ status: 404 }
+			);
+		}
+
+		if (!canAccessTransaksi(session.role, session.sekolah_id, transaksi.sekolah_id || null)) {
+			return json(
+				{
+					success: false,
+					message: 'Akses ditolak',
+				},
+				{ status: 403 }
 			);
 		}
 
@@ -69,7 +101,32 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 		if (data.jenis !== undefined) updateData.jenis = data.jenis;
 		if (data.jumlah !== undefined) updateData.jumlah = parseFloat(data.jumlah);
 		if (data.metode !== undefined) updateData.metode = data.metode;
-		if (data.siswaId !== undefined) updateData.siswa_id = data.siswaId || null;
+		if (data.siswaId !== undefined) {
+			if (data.siswaId) {
+				const siswa = await Siswa.findById(data.siswaId);
+				if (!siswa) {
+					return json(
+						{
+							success: false,
+							message: 'Siswa tidak ditemukan',
+						},
+						{ status: 404 }
+					);
+				}
+
+				if (!canAccessTransaksi(session.role, session.sekolah_id, siswa.sekolah_id || null)) {
+					return json(
+						{
+							success: false,
+							message: 'Akses ditolak untuk siswa dari sekolah lain',
+						},
+						{ status: 403 }
+					);
+				}
+			}
+
+			updateData.siswa_id = data.siswaId || null;
+		}
 		if (data.namaPengirim !== undefined) updateData.nama_pengirim = data.namaPengirim || null;
 		if (data.kelasPengirim !== undefined) updateData.kelas_pengirim = data.kelasPengirim || null;
 		if (data.nomorAkun !== undefined) updateData.nomor_akun = data.nomorAkun || null;
@@ -106,8 +163,9 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 	}
 };
 
-export const DELETE: RequestHandler = async ({ params }) => {
+export const DELETE: RequestHandler = async ({ params, cookies }) => {
 	try {
+		const session = await auth.requireAuth(cookies);
 		const transaksi = await Transaksi.findById(params.id);
 
 		if (!transaksi) {
@@ -117,6 +175,16 @@ export const DELETE: RequestHandler = async ({ params }) => {
 					message: 'Transaksi not found',
 				},
 				{ status: 404 }
+			);
+		}
+
+		if (!canAccessTransaksi(session.role, session.sekolah_id, transaksi.sekolah_id || null)) {
+			return json(
+				{
+					success: false,
+					message: 'Akses ditolak',
+				},
+				{ status: 403 }
 			);
 		}
 

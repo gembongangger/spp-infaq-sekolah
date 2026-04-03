@@ -3,7 +3,7 @@ import { U as User } from "../../../../../../chunks/User.js";
 import { a as auth } from "../../../../../../chunks/index2.js";
 const PUT = async ({ params, request, cookies }) => {
   try {
-    const session = auth.requireAuth(cookies);
+    const session = await auth.requireAuth(cookies);
     if (session.role !== "superadmin") {
       return json(
         { success: false, message: "Akses ditolak. Hanya superadmin yang dapat mengakses." },
@@ -73,7 +73,7 @@ const PUT = async ({ params, request, cookies }) => {
 };
 const DELETE = async ({ params, cookies }) => {
   try {
-    const session = auth.requireAuth(cookies);
+    const session = await auth.requireAuth(cookies);
     if (session.role !== "superadmin") {
       return json(
         { success: false, message: "Akses ditolak. Hanya superadmin yang dapat mengakses." },

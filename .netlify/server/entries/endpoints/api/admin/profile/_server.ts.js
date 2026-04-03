@@ -3,7 +3,7 @@ import { U as User } from "../../../../../chunks/User.js";
 import { a as auth } from "../../../../../chunks/index2.js";
 const PUT = async ({ request, cookies }) => {
   try {
-    const session = auth.requireAuth(cookies);
+    const session = await auth.requireAuth(cookies);
     const body = await request.json();
     const { nama_lengkap, no_hp, foto_url } = body;
     if (!nama_lengkap && !no_hp && !foto_url) {

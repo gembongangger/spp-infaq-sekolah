@@ -3,7 +3,7 @@ import { U as User } from "../../../../../chunks/User.js";
 import { a as auth } from "../../../../../chunks/index2.js";
 const GET = async ({ cookies }) => {
   try {
-    const session = auth.getSession(cookies);
+    const session = await auth.getSession(cookies);
     if (!session) {
       return json(
         {
