@@ -4,9 +4,15 @@ dist/
 coverage/
 .DS_Store
 *.log
+frontend.log
+*.zip
+*.tar.gz
 .env*
 !.env.example
 data/*.db*
+backups/
+turso.cred.txt
+.qwen/
 
 # Local Netlify folder
 .netlify
