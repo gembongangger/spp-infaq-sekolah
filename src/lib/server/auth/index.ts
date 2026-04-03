@@ -31,14 +31,14 @@ export const auth = {
 	},
 
 	/** Get session from cookies */
-	getSession(cookies: Cookies): SessionData | null {
+	async getSession(cookies: Cookies): Promise<SessionData | null> {
 		const userId = cookies.get(SESSION_COOKIE);
 
 		if (!userId) {
 			return null;
 		}
 
-		const user = User.findById(userId);
+		const user = await User.findById(userId);
 		if (!user) {
 			return null;
 		}
@@ -59,13 +59,13 @@ export const auth = {
 	},
 
 	/** Check if user is authenticated */
-	isAuthenticated(cookies: Cookies): boolean {
-		return this.getSession(cookies) !== null;
+	async isAuthenticated(cookies: Cookies): Promise<boolean> {
+		return (await this.getSession(cookies)) !== null;
 	},
 
 	/** Require authentication, throw error if not authenticated */
-	requireAuth(cookies: Cookies): SessionData {
-		const session = this.getSession(cookies);
+	async requireAuth(cookies: Cookies): Promise<SessionData> {
+		const session = await this.getSession(cookies);
 		if (!session) {
 			throw new Error('Not authenticated');
 		}

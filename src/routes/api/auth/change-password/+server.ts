@@ -9,7 +9,7 @@ import { auth } from '$lib/server/auth';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
-		const session = auth.requireAuth(cookies);
+		const session = await auth.requireAuth(cookies);
 
 		const data = await request.json();
 

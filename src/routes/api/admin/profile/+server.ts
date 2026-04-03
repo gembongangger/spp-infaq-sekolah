@@ -10,7 +10,7 @@ import { auth } from '$lib/server/auth';
 export const PUT: RequestHandler = async ({ request, cookies }) => {
 	try {
 		// Require authentication
-		const session = auth.requireAuth(cookies);
+		const session = await auth.requireAuth(cookies);
 
 		const body = await request.json();
 		const { nama_lengkap, no_hp, foto_url } = body;

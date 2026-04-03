@@ -13,7 +13,7 @@ import bcrypt from 'bcryptjs';
 
 export const PUT: RequestHandler = async ({ params, request, cookies }) => {
 	try {
-		const session = auth.requireAuth(cookies);
+		const session = await auth.requireAuth(cookies);
 		
 		if (session.role !== 'superadmin') {
 			return json(
@@ -102,7 +102,7 @@ export const PUT: RequestHandler = async ({ params, request, cookies }) => {
 
 export const DELETE: RequestHandler = async ({ params, cookies }) => {
 	try {
-		const session = auth.requireAuth(cookies);
+		const session = await auth.requireAuth(cookies);
 		
 		if (session.role !== 'superadmin') {
 			return json(

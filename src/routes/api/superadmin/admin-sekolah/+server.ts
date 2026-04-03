@@ -13,7 +13,7 @@ import { auth } from '$lib/server/auth';
 
 export const GET: RequestHandler = async ({ cookies, url }) => {
 	try {
-		const session = auth.requireAuth(cookies);
+		const session = await auth.requireAuth(cookies);
 		
 		if (session.role !== 'superadmin') {
 			return json(
@@ -58,7 +58,7 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
-		const session = auth.requireAuth(cookies);
+		const session = await auth.requireAuth(cookies);
 		
 		if (session.role !== 'superadmin') {
 			return json(
