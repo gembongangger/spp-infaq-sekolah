@@ -1,0 +1,16 @@
+# Install dependencies
+npm install
+
+# Buat superadmin
+node scripts/create-superadmin.js
+
+# Run app
+npm run dev
+
+# Buka: http://localhost:5173
+
+
+Enter superadmin details:
+
+Email: gembongangger@gmail.com
+Password (min 6 chars): Gembongmajesa112

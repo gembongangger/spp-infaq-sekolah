@@ -9,7 +9,11 @@
       "Bash(chmod *)",
       "Bash(rm *)",
       "Bash(npm cache *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(netlify *)"
     ]
   },
   "$version": 3
