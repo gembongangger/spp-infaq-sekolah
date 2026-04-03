@@ -10,14 +10,16 @@ return {
 	assets: new Set([]),
 	mimeTypes: {},
 	_: {
-		client: {start:"_app/immutable/entry/start.Db8PTPNm.js",app:"_app/immutable/entry/app.fSL20NYC.js",imports:["_app/immutable/entry/start.Db8PTPNm.js","_app/immutable/chunks/D1xoGXi4.js","_app/immutable/chunks/B7coVsXN.js","_app/immutable/entry/app.fSL20NYC.js","_app/immutable/chunks/B7coVsXN.js","_app/immutable/chunks/BZeQqg5V.js","_app/immutable/chunks/DlFoiPLv.js","_app/immutable/chunks/bUGJcB6p.js","_app/immutable/chunks/CRHJkwog.js","_app/immutable/chunks/BB_IpFSq.js"],stylesheets:[],fonts:[],uses_env_dynamic_public:false},
+		client: {start:"_app/immutable/entry/start.YMb6Gzmf.js",app:"_app/immutable/entry/app.DwXC55uw.js",imports:["_app/immutable/entry/start.YMb6Gzmf.js","_app/immutable/chunks/DgEy9GIN.js","_app/immutable/chunks/xPGfv2e1.js","_app/immutable/entry/app.DwXC55uw.js","_app/immutable/chunks/xPGfv2e1.js","_app/immutable/chunks/Bjg-_av6.js","_app/immutable/chunks/D2Yg9-wU.js","_app/immutable/chunks/BeJMkqMy.js","_app/immutable/chunks/CcEq5CE-.js","_app/immutable/chunks/TgUQ_wyb.js"],stylesheets:[],fonts:[],uses_env_dynamic_public:false},
 		nodes: [
 			__memo(() => import('./nodes/0.js')),
 			__memo(() => import('./nodes/1.js')),
 			__memo(() => import('./nodes/2.js')),
 			__memo(() => import('./nodes/3.js')),
 			__memo(() => import('./nodes/4.js')),
-			__memo(() => import('./nodes/5.js'))
+			__memo(() => import('./nodes/5.js')),
+			__memo(() => import('./nodes/6.js')),
+			__memo(() => import('./nodes/7.js'))
 		],
 		remotes: {
 			
@@ -129,6 +131,34 @@ return {
 				endpoint: __memo(() => import('./entries/endpoints/api/siswa/_id_/_server.ts.js'))
 			},
 			{
+				id: "/api/superadmin/admin-sekolah",
+				pattern: /^\/api\/superadmin\/admin-sekolah\/?$/,
+				params: [],
+				page: null,
+				endpoint: __memo(() => import('./entries/endpoints/api/superadmin/admin-sekolah/_server.ts.js'))
+			},
+			{
+				id: "/api/superadmin/admin-sekolah/[id]",
+				pattern: /^\/api\/superadmin\/admin-sekolah\/([^/]+?)\/?$/,
+				params: [{"name":"id","optional":false,"rest":false,"chained":false}],
+				page: null,
+				endpoint: __memo(() => import('./entries/endpoints/api/superadmin/admin-sekolah/_id_/_server.ts.js'))
+			},
+			{
+				id: "/api/superadmin/sekolah",
+				pattern: /^\/api\/superadmin\/sekolah\/?$/,
+				params: [],
+				page: null,
+				endpoint: __memo(() => import('./entries/endpoints/api/superadmin/sekolah/_server.ts.js'))
+			},
+			{
+				id: "/api/superadmin/sekolah/[id]",
+				pattern: /^\/api\/superadmin\/sekolah\/([^/]+?)\/?$/,
+				params: [{"name":"id","optional":false,"rest":false,"chained":false}],
+				page: null,
+				endpoint: __memo(() => import('./entries/endpoints/api/superadmin/sekolah/_id_/_server.ts.js'))
+			},
+			{
 				id: "/api/transaksi",
 				pattern: /^\/api\/transaksi\/?$/,
 				params: [],
@@ -175,6 +205,20 @@ return {
 				pattern: /^\/reset-password\/?$/,
 				params: [],
 				page: { layouts: [0,], errors: [1,], leaf: 5 },
+				endpoint: null
+			},
+			{
+				id: "/superadmin/dashboard",
+				pattern: /^\/superadmin\/dashboard\/?$/,
+				params: [],
+				page: { layouts: [0,], errors: [1,], leaf: 6 },
+				endpoint: null
+			},
+			{
+				id: "/superadmin/login",
+				pattern: /^\/superadmin\/login\/?$/,
+				params: [],
+				page: { layouts: [0,], errors: [1,], leaf: 7 },
 				endpoint: null
 			}
 		],

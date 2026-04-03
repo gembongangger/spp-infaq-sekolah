@@ -9,7 +9,7 @@ import { Siswa } from '$lib/server/models/Siswa';
 
 export const GET: RequestHandler = async ({ params }) => {
 	try {
-		const siswa = Siswa.findById(params.id);
+		const siswa = await Siswa.findById(params.id);
 
 		if (!siswa) {
 			return json(
@@ -41,7 +41,7 @@ export const GET: RequestHandler = async ({ params }) => {
 
 export const PUT: RequestHandler = async ({ params, request }) => {
 	try {
-		const siswa = Siswa.findById(params.id);
+		const siswa = await Siswa.findById(params.id);
 
 		if (!siswa) {
 			return json(
@@ -57,7 +57,7 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 
 		// Check duplicate nomor_akun if changed
 		if (data.nomorAkun && data.nomorAkun !== siswa.nomor_akun) {
-			const existing = Siswa.findByNomorAkun(data.nomorAkun);
+			const existing = await Siswa.findByNomorAkun(data.nomorAkun);
 			if (existing && existing.id !== params.id) {
 				return json(
 					{
@@ -69,7 +69,7 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 			}
 		}
 
-		const updated = Siswa.update(params.id, {
+		const updated = await Siswa.update(params.id, {
 			nomorAkun: data.nomorAkun,
 			nama: data.nama,
 			kelas: data.kelas,
@@ -106,7 +106,7 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 
 export const DELETE: RequestHandler = async ({ params }) => {
 	try {
-		const siswa = Siswa.findById(params.id);
+		const siswa = await Siswa.findById(params.id);
 
 		if (!siswa) {
 			return json(
@@ -118,7 +118,7 @@ export const DELETE: RequestHandler = async ({ params }) => {
 			);
 		}
 
-		Siswa.delete(params.id);
+		await Siswa.delete(params.id);
 
 		return json(
 			{

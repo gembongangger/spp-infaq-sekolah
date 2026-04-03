@@ -11,6 +11,6 @@ export default defineConfig({
 		}
 	},
 	optimizeDeps: {
-		exclude: ['better-sqlite3']
+		exclude: ['@libsql/client']
 	}
 });

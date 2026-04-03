@@ -27,7 +27,7 @@ export const PUT: RequestHandler = async ({ request, cookies }) => {
 		}
 
 		// Update profile
-		const updated = User.updateProfile(session.user_id, {
+		const updated = await User.updateProfile(session.user_id, {
 			nama_lengkap: nama_lengkap ?? null,
 			no_hp: no_hp ?? null,
 			foto_url: foto_url ?? null,
@@ -44,7 +44,7 @@ export const PUT: RequestHandler = async ({ request, cookies }) => {
 		}
 
 		// Get updated user data
-		const updatedUser = User.findById(session.user_id);
+		const updatedUser = await User.findById(session.user_id);
 
 		if (!updatedUser) {
 			return json(

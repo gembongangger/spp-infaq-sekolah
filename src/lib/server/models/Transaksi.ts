@@ -1,5 +1,5 @@
 /**
- * Transaksi Model
+ * Transaksi Model (Async for Turso/LibSQL)
  */
 import db from '$lib/server/db';
 import { v4 as uuidv4 } from 'uuid';
@@ -89,7 +89,7 @@ export const Transaksi = {
 	},
 
 	/** Get all transaksi with optional filters */
-	getAll(filters?: TransaksiFilters & { sekolahId?: string | null }): Transaksi[] {
+	async getAll(filters?: TransaksiFilters & { sekolahId?: string | null }): Promise<Transaksi[]> {
 		let query = 'SELECT * FROM transaksi WHERE 1=1';
 		const params: (string | number | null)[] = [];
 
@@ -125,18 +125,22 @@ export const Transaksi = {
 			params.push(filters.limit);
 		}
 
-		const stmt = db.prepare(query);
-		return stmt.all(...params) as Transaksi[];
+		const result = await db.execute({ sql: query, args: params });
+		return result.rows as unknown as Transaksi[];
 	},
 
 	/** Get transaksi by ID */
-	findById(id: string): Transaksi | null {
-		const stmt = db.prepare('SELECT * FROM transaksi WHERE id = ?');
-		return stmt.get(id) as Transaksi | null;
+	async findById(id: string): Promise<Transaksi | null> {
+		const result = await db.execute({
+			sql: 'SELECT * FROM transaksi WHERE id = ?',
+			args: [id]
+		});
+		if (result.rows.length === 0) return null;
+		return result.rows[0] as unknown as Transaksi;
 	},
 
 	/** Create new transaksi */
-	create(data: {
+	async create(data: {
 		tanggal: string;
 		keterangan: string;
 		kategori: string;
@@ -149,40 +153,42 @@ export const Transaksi = {
 		nomorAkun?: string | null;
 		bulan?: string | null;
 		sekolah_id?: string | null;
-	}): Transaksi {
+	}): Promise<Transaksi> {
 		const id = uuidv4();
 		const now = new Date().toISOString();
 		const sekolah_id = data.sekolah_id || null;
 
-		const stmt = db.prepare(`
-			INSERT INTO transaksi (id, tanggal, keterangan, kategori, jenis, jumlah, metode,
-				siswa_id, nama_pengirim, kelas_pengirim, nomor_akun, bulan, sekolah_id, created_at, updated_at)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-		`);
+		await db.execute({
+			sql: `
+				INSERT INTO transaksi (id, tanggal, keterangan, kategori, jenis, jumlah, metode,
+					siswa_id, nama_pengirim, kelas_pengirim, nomor_akun, bulan, sekolah_id, created_at, updated_at)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			`,
+			args: [
+				id,
+				data.tanggal,
+				data.keterangan,
+				data.kategori,
+				data.jenis,
+				data.jumlah,
+				data.metode,
+				data.siswaId || null,
+				data.namaPengirim || null,
+				data.kelasPengirim || null,
+				data.nomorAkun || null,
+				data.bulan || null,
+				sekolah_id,
+				now,
+				now
+			]
+		});
 
-		stmt.run(
-			id,
-			data.tanggal,
-			data.keterangan,
-			data.kategori,
-			data.jenis,
-			data.jumlah,
-			data.metode,
-			data.siswaId || null,
-			data.namaPengirim || null,
-			data.kelasPengirim || null,
-			data.nomorAkun || null,
-			data.bulan || null,
-			sekolah_id,
-			now,
-			now
-		);
-
-		return this.findById(id)!;
+		const transaksi = await this.findById(id);
+		return transaksi!;
 	},
 
 	/** Update transaksi */
-	update(id: string, data: Partial<TransaksiDTO>): Transaksi | null {
+	async update(id: string, data: Partial<TransaksiDTO>): Promise<Transaksi | null> {
 		const now = new Date().toISOString();
 		const updates: string[] = [];
 		const values: (string | number | null)[] = [];
@@ -210,62 +216,67 @@ export const Transaksi = {
 		}
 
 		if (updates.length === 0) {
-			return this.findById(id);
+			return await this.findById(id);
 		}
 
 		updates.push('updated_at = ?');
 		values.push(now);
 		values.push(id);
 
-		const stmt = db.prepare(`
-			UPDATE transaksi 
-			SET ${updates.join(', ')}
-			WHERE id = ?
-		`);
+		await db.execute({
+			sql: `
+				UPDATE transaksi
+				SET ${updates.join(', ')}
+				WHERE id = ?
+			`,
+			args: values
+		});
 
-		stmt.run(...values);
-
-		return this.findById(id);
+		return await this.findById(id);
 	},
 
 	/** Delete transaksi */
-	delete(id: string): boolean {
-		const stmt = db.prepare('DELETE FROM transaksi WHERE id = ?');
-		const result = stmt.run(id);
-		return result.changes > 0;
+	async delete(id: string): Promise<boolean> {
+		const result = await db.execute({
+			sql: 'DELETE FROM transaksi WHERE id = ?',
+			args: [id]
+		});
+		return result.rowsAffected > 0;
 	},
 
 	/** Get statistics */
-	getStats(sekolahId?: string | null): StatsDTO {
-		const whereClause = sekolahId ? 'WHERE sekolah_id = ?' : '';
+	async getStats(sekolahId?: string | null): Promise<StatsDTO> {
+		const whereClause = sekolahId ? 'AND sekolah_id = ?' : '';
 		const params = sekolahId ? [sekolahId] : [];
 
-		const totalInfaq = db
-			.prepare(
-				`SELECT COALESCE(SUM(jumlah), 0) as total FROM transaksi WHERE LOWER(kategori) = LOWER(?) AND LOWER(jenis) = LOWER(?) ${sekolahId ? 'AND sekolah_id = ?' : ''}`
-			)
-			.get('infaq', 'masuk', ...params) as { total: number };
+		const totalInfaqResult = await db.execute({
+			sql: `SELECT COALESCE(SUM(jumlah), 0) as total FROM transaksi WHERE LOWER(kategori) = LOWER(?) AND LOWER(jenis) = LOWER(?) ${sekolahId ? 'AND sekolah_id = ?' : ''}`,
+			args: ['infaq', 'masuk', ...params]
+		});
+		const totalInfaq = (totalInfaqResult.rows[0] as any).total;
 
-		const totalJariyah = db
-			.prepare(
-				`SELECT COALESCE(SUM(jumlah), 0) as total FROM transaksi WHERE LOWER(kategori) = LOWER(?) AND LOWER(jenis) = LOWER(?) ${sekolahId ? 'AND sekolah_id = ?' : ''}`
-			)
-			.get('jariyah', 'masuk', ...params) as { total: number };
+		const totalJariyahResult = await db.execute({
+			sql: `SELECT COALESCE(SUM(jumlah), 0) as total FROM transaksi WHERE LOWER(kategori) = LOWER(?) AND LOWER(jenis) = LOWER(?) ${sekolahId ? 'AND sekolah_id = ?' : ''}`,
+			args: ['jariyah', 'masuk', ...params]
+		});
+		const totalJariyah = (totalJariyahResult.rows[0] as any).total;
 
-		const totalKeluar = db
-			.prepare(`SELECT COALESCE(SUM(jumlah), 0) as total FROM transaksi WHERE LOWER(jenis) = LOWER(?) ${sekolahId ? 'AND sekolah_id = ?' : ''}`)
-			.get('keluar', ...params) as { total: number };
+		const totalKeluarResult = await db.execute({
+			sql: `SELECT COALESCE(SUM(jumlah), 0) as total FROM transaksi WHERE LOWER(jenis) = LOWER(?) ${sekolahId ? 'AND sekolah_id = ?' : ''}`,
+			args: ['keluar', ...params]
+		});
+		const totalKeluar = (totalKeluarResult.rows[0] as any).total;
 
 		return {
-			totalInfaq: totalInfaq.total,
-			totalJariyah: totalJariyah.total,
-			totalKeluar: totalKeluar.total,
-			saldo: totalInfaq.total + totalJariyah.total - totalKeluar.total,
+			totalInfaq,
+			totalJariyah,
+			totalKeluar,
+			saldo: totalInfaq + totalJariyah - totalKeluar,
 		};
 	},
 
 	/** Get sender summaries */
-	getSenders(sekolahId?: string | null): SenderDTO[] {
+	async getSenders(sekolahId?: string | null): Promise<SenderDTO[]> {
 		const whereClause = sekolahId ? 'AND sekolah_id = ?' : '';
 		const params = sekolahId ? [sekolahId] : [];
 
@@ -282,7 +293,8 @@ export const Transaksi = {
 			ORDER BY total_infaq + total_jariyah DESC
 		`;
 
-		const rows = db.prepare(query).all(...params) as Array<{
+		const result = await db.execute({ sql: query, args: params });
+		const rows = result.rows as unknown as Array<{
 			nama_pengirim: string;
 			kelas_pengirim: string | null;
 			nomor_akun: string | null;

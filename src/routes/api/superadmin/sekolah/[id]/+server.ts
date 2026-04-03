@@ -24,7 +24,7 @@ export const GET: RequestHandler = async ({ params, cookies }) => {
 			);
 		}
 
-		const school = Sekolah.findById(params.id);
+		const school = await Sekolah.findById(params.id);
 		if (!school) {
 			return json(
 				{ success: false, message: 'Sekolah tidak ditemukan' },
@@ -32,7 +32,7 @@ export const GET: RequestHandler = async ({ params, cookies }) => {
 			);
 		}
 
-		const stats = Sekolah.getStats(school.id);
+		const stats = await Sekolah.getStats(school.id);
 		return json(
 			{ success: true, data: { ...Sekolah.toDTO(school), stats } },
 			{ status: 200 }
@@ -57,7 +57,7 @@ export const PUT: RequestHandler = async ({ params, request, cookies }) => {
 		}
 
 		const data = await request.json();
-		const school = Sekolah.findById(params.id);
+		const school = await Sekolah.findById(params.id);
 
 		if (!school) {
 			return json(
@@ -68,7 +68,7 @@ export const PUT: RequestHandler = async ({ params, request, cookies }) => {
 
 		// Check if kode is being changed and if it already exists
 		if (data.kode && data.kode.toUpperCase() !== school.kode) {
-			const existing = Sekolah.findByKode(data.kode.toUpperCase());
+			const existing = await Sekolah.findByKode(data.kode.toUpperCase());
 			if (existing) {
 				return json(
 					{ success: false, message: 'Kode sekolah sudah digunakan' },
@@ -77,7 +77,7 @@ export const PUT: RequestHandler = async ({ params, request, cookies }) => {
 			}
 		}
 
-		const updated = Sekolah.update(params.id, {
+		const updated = await Sekolah.update(params.id, {
 			nama: data.nama,
 			kode: data.kode,
 			alamat: data.alamat,
@@ -111,7 +111,7 @@ export const DELETE: RequestHandler = async ({ params, cookies }) => {
 			);
 		}
 
-		const school = Sekolah.findById(params.id);
+		const school = await Sekolah.findById(params.id);
 		if (!school) {
 			return json(
 				{ success: false, message: 'Sekolah tidak ditemukan' },
@@ -120,7 +120,7 @@ export const DELETE: RequestHandler = async ({ params, cookies }) => {
 		}
 
 		// Soft delete
-		Sekolah.softDelete(params.id);
+		await Sekolah.softDelete(params.id);
 
 		return json(
 			{ success: true, message: 'Sekolah berhasil dinonaktifkan' },

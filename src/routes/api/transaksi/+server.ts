@@ -29,7 +29,7 @@ export const GET: RequestHandler = async ({ url }) => {
 			filters.limit = parseInt(url.searchParams.get('limit') || '0', 10);
 		}
 
-		const transaksiList = Transaksi.getAll(filters);
+		const transaksiList = await Transaksi.getAll(filters);
 
 		return json(
 			{
@@ -74,7 +74,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			tanggal = new Date(tanggal).toISOString().split('T')[0];
 		}
 
-		const transaksi = Transaksi.create({
+		const transaksi = await Transaksi.create({
 			tanggal,
 			keterangan: data.keterangan,
 			kategori: data.kategori,

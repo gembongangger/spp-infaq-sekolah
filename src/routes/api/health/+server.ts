@@ -8,7 +8,7 @@ import db from '$lib/server/db';
 export const GET: RequestHandler = async () => {
 	try {
 		// Test database connection
-		db.prepare('SELECT 1').get();
+		await db.execute('SELECT 1');
 
 		return json(
 			{

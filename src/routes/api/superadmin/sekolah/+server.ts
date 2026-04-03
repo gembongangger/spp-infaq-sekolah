@@ -22,14 +22,14 @@ export const GET: RequestHandler = async ({ cookies }) => {
 			);
 		}
 
-		const schools = Sekolah.getAll();
-		const schoolsWithStats = schools.map(school => {
-			const stats = Sekolah.getStats(school.id);
+		const schools = await Sekolah.getAll();
+		const schoolsWithStats = await Promise.all(schools.map(async (school) => {
+			const stats = await Sekolah.getStats(school.id);
 			return {
 				...Sekolah.toDTO(school),
 				stats,
 			};
-		});
+		}));
 
 		return json(
 			{ success: true, data: schoolsWithStats },
@@ -65,7 +65,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		}
 
 		// Check if kode already exists
-		const existing = Sekolah.findByKode(data.kode.toUpperCase());
+		const existing = await Sekolah.findByKode(data.kode.toUpperCase());
 		if (existing) {
 			return json(
 				{ success: false, message: 'Kode sekolah sudah digunakan' },
@@ -73,7 +73,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			);
 		}
 
-		const school = Sekolah.create({
+		const school = await Sekolah.create({
 			nama: data.nama,
 			kode: data.kode.toUpperCase(),
 			alamat: data.alamat || null,

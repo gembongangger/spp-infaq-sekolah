@@ -23,12 +23,12 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
 		}
 
 		const sekolahId = url.searchParams.get('sekolah_id');
-		
+
 		let admins;
 		if (sekolahId) {
-			admins = User.getBySekolah(sekolahId);
+			admins = await User.getBySekolah(sekolahId);
 		} else {
-			admins = User.getAllWithSekolah();
+			admins = await User.getAllWithSekolah();
 		}
 
 		const adminDTOs = admins.map(admin => ({
@@ -77,7 +77,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		}
 
 		// Check if school exists
-		const school = Sekolah.findById(data.sekolah_id);
+		const school = await Sekolah.findById(data.sekolah_id);
 		if (!school) {
 			return json(
 				{ success: false, message: 'Sekolah tidak ditemukan' },
@@ -86,7 +86,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		}
 
 		// Check if email already exists
-		const existing = User.findByEmail(data.email);
+		const existing = await User.findByEmail(data.email);
 		if (existing) {
 			return json(
 				{ success: false, message: 'Email sudah terdaftar' },
@@ -95,7 +95,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		}
 
 		// Create admin user
-		const admin = User.create({
+		const admin = await User.create({
 			username: data.email,
 			email: data.email,
 			password: data.password,

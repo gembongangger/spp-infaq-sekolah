@@ -21,7 +21,7 @@ export const GET: RequestHandler = async ({ cookies }) => {
 			);
 		}
 
-		const user = User.findById(session.user_id);
+		const user = await User.findById(session.user_id);
 
 		if (!user || !user.is_active) {
 			auth.clearSession(cookies);

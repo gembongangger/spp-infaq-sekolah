@@ -8,7 +8,7 @@ import { Siswa } from '$lib/server/models/Siswa';
 
 export const GET: RequestHandler = async () => {
 	try {
-		const siswaList = Siswa.getAll();
+		const siswaList = await Siswa.getAll();
 		return json(
 			{
 				success: true,
@@ -43,7 +43,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		// Check duplicate nomor_akun
-		const existing = Siswa.findByNomorAkun(data.nomorAkun);
+		const existing = await Siswa.findByNomorAkun(data.nomorAkun);
 		if (existing) {
 			return json(
 				{
@@ -54,7 +54,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			);
 		}
 
-		const siswa = Siswa.create({
+		const siswa = await Siswa.create({
 			nomorAkun: data.nomorAkun,
 			nama: data.nama,
 			kelas: data.kelas,

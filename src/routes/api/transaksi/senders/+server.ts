@@ -7,7 +7,7 @@ import { Transaksi } from '$lib/server/models/Transaksi';
 
 export const GET: RequestHandler = async () => {
 	try {
-		const senders = Transaksi.getSenders();
+		const senders = await Transaksi.getSenders();
 
 		return json(
 			{

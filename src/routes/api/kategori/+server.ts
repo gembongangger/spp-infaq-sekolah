@@ -8,7 +8,7 @@ import { Kategori } from '$lib/server/models/Kategori';
 
 export const GET: RequestHandler = async () => {
 	try {
-		const categories = Kategori.getAll();
+		const categories = await Kategori.getAll();
 
 		return json(
 			{
@@ -43,7 +43,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		// Check if already exists
-		const existing = Kategori.findByNama(data.nama);
+		const existing = await Kategori.findByNama(data.nama);
 		if (existing) {
 			return json(
 				{
@@ -54,7 +54,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			);
 		}
 
-		const newKategori = Kategori.create({
+		const newKategori = await Kategori.create({
 			nama: data.nama,
 			ikon: data.ikon || 'Heart',
 			warna: data.warna || '#10b981',

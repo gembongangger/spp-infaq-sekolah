@@ -23,7 +23,7 @@ export const PUT: RequestHandler = async ({ params, request, cookies }) => {
 		}
 
 		const data = await request.json();
-		const user = User.findByIdRaw(params.id);
+		const user = await User.findByIdRaw(params.id);
 
 		if (!user) {
 			return json(
@@ -34,7 +34,7 @@ export const PUT: RequestHandler = async ({ params, request, cookies }) => {
 
 		// Check if email is being changed and if it already exists
 		if (data.email && data.email !== user.email) {
-			const existing = User.findByEmail(data.email);
+			const existing = await User.findByEmail(data.email);
 			if (existing) {
 				return json(
 					{ success: false, message: 'Email sudah terdaftar' },
@@ -43,68 +43,50 @@ export const PUT: RequestHandler = async ({ params, request, cookies }) => {
 			}
 		}
 
-		// Update user
+		// Update user fields manually since we don't have a generic update method
 		const now = new Date().toISOString();
+		const updateData: any = {};
+		
+		if (data.email !== undefined) {
+			updateData.email = data.email;
+			// Also update username if it was the same as email
+			if (user.username === user.email) {
+				updateData.username = data.email;
+			}
+		}
+		if (data.role !== undefined) updateData.role = data.role;
+		if (data.sekolah_id !== undefined) updateData.sekolah_id = data.sekolah_id;
+		if (data.nama_lengkap !== undefined) updateData.nama_lengkap = data.nama_lengkap;
+		if (data.no_hp !== undefined) updateData.no_hp = data.no_hp;
+		if (data.is_active !== undefined) updateData.is_active = data.is_active ? 1 : 0;
+
+		// Update password if provided
+		if (data.password) {
+			await User.updatePassword(params.id, data.password);
+		}
+
+		// Update other fields using direct db query
+		const db = (await import('$lib/server/db')).default;
 		const updates: string[] = [];
 		const values: any[] = [];
 
-		if (data.email !== undefined) {
-			updates.push('email = ?');
-			values.push(data.email);
-			// Also update username if it was the same as email
-			if (user.username === user.email) {
-				updates.push('username = ?');
-				values.push(data.email);
-			}
+		for (const [key, value] of Object.entries(updateData)) {
+			updates.push(`${key} = ?`);
+			values.push(value);
 		}
 
-		if (data.password) {
-			const passwordHash = bcrypt.hashSync(data.password, 10);
-			updates.push('password_hash = ?');
-			values.push(passwordHash);
+		if (updates.length > 0) {
+			updates.push('updated_at = ?');
+			values.push(now);
+			values.push(params.id);
+
+			await db.execute({
+				sql: `UPDATE user SET ${updates.join(', ')} WHERE id = ?`,
+				args: values
+			});
 		}
 
-		if (data.role !== undefined) {
-			updates.push('role = ?');
-			values.push(data.role);
-		}
-
-		if (data.sekolah_id !== undefined) {
-			updates.push('sekolah_id = ?');
-			values.push(data.sekolah_id);
-		}
-
-		if (data.nama_lengkap !== undefined) {
-			updates.push('nama_lengkap = ?');
-			values.push(data.nama_lengkap);
-		}
-
-		if (data.no_hp !== undefined) {
-			updates.push('no_hp = ?');
-			values.push(data.no_hp);
-		}
-
-		if (data.is_active !== undefined) {
-			updates.push('is_active = ?');
-			values.push(data.is_active ? 1 : 0);
-		}
-
-		if (updates.length === 0) {
-			return json(
-				{ success: false, message: 'Tidak ada data yang diperbarui' },
-				{ status: 400 }
-			);
-		}
-
-		updates.push('updated_at = ?');
-		values.push(now);
-		values.push(params.id);
-
-		const db = (await import('$lib/server/db')).default;
-		const stmt = db.prepare(`UPDATE user SET ${updates.join(', ')} WHERE id = ?`);
-		stmt.run(...values);
-
-		const updatedUser = User.findByIdRaw(params.id)!;
+		const updatedUser = await User.findByIdRaw(params.id)!;
 
 		return json(
 			{ success: true, message: 'Admin berhasil diperbarui', data: User.toDTO(updatedUser) },
@@ -129,7 +111,7 @@ export const DELETE: RequestHandler = async ({ params, cookies }) => {
 			);
 		}
 
-		const user = User.findByIdRaw(params.id);
+		const user = await User.findByIdRaw(params.id);
 		if (!user) {
 			return json(
 				{ success: false, message: 'User tidak ditemukan' },
@@ -148,8 +130,10 @@ export const DELETE: RequestHandler = async ({ params, cookies }) => {
 		// Soft delete by setting is_active to 0
 		const now = new Date().toISOString();
 		const db = (await import('$lib/server/db')).default;
-		const stmt = db.prepare('UPDATE user SET is_active = 0, updated_at = ? WHERE id = ?');
-		stmt.run(now, params.id);
+		await db.execute({
+			sql: 'UPDATE user SET is_active = 0, updated_at = ? WHERE id = ?',
+			args: [now, params.id]
+		});
 
 		return json(
 			{ success: true, message: 'Admin berhasil dinonaktifkan' },

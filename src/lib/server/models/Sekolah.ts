@@ -1,5 +1,5 @@
 /**
- * Sekolah Model
+ * Sekolah Model (Async for Turso/LibSQL)
  * Multi-tenant school management
  */
 import db from '$lib/server/db';
@@ -66,61 +66,71 @@ export const Sekolah = {
 	},
 
 	/** Get all schools */
-	getAll(): Sekolah[] {
-		const stmt = db.prepare('SELECT * FROM sekolah ORDER BY nama ASC');
-		return stmt.all() as Sekolah[];
+	async getAll(): Promise<Sekolah[]> {
+		const result = await db.execute('SELECT * FROM sekolah ORDER BY nama ASC');
+		return result.rows as unknown as Sekolah[];
 	},
 
 	/** Get active schools only */
-	getActive(): Sekolah[] {
-		const stmt = db.prepare('SELECT * FROM sekolah WHERE is_active = 1 ORDER BY nama ASC');
-		return stmt.all() as Sekolah[];
+	async getActive(): Promise<Sekolah[]> {
+		const result = await db.execute('SELECT * FROM sekolah WHERE is_active = 1 ORDER BY nama ASC');
+		return result.rows as unknown as Sekolah[];
 	},
 
 	/** Get school by ID */
-	findById(id: string): Sekolah | null {
-		const stmt = db.prepare('SELECT * FROM sekolah WHERE id = ?');
-		return stmt.get(id) as Sekolah | null;
+	async findById(id: string): Promise<Sekolah | null> {
+		const result = await db.execute({
+			sql: 'SELECT * FROM sekolah WHERE id = ?',
+			args: [id]
+		});
+		if (result.rows.length === 0) return null;
+		return result.rows[0] as unknown as Sekolah;
 	},
 
 	/** Get school by kode */
-	findByKode(kode: string): Sekolah | null {
-		const stmt = db.prepare('SELECT * FROM sekolah WHERE kode = ?');
-		return stmt.get(kode) as Sekolah | null;
+	async findByKode(kode: string): Promise<Sekolah | null> {
+		const result = await db.execute({
+			sql: 'SELECT * FROM sekolah WHERE kode = ?',
+			args: [kode]
+		});
+		if (result.rows.length === 0) return null;
+		return result.rows[0] as unknown as Sekolah;
 	},
 
 	/** Create new school */
-	create(data: SekolahCreateDTO): Sekolah {
+	async create(data: SekolahCreateDTO): Promise<Sekolah> {
 		const id = uuidv4();
 		const now = new Date().toISOString();
 
-		const stmt = db.prepare(`
-			INSERT INTO sekolah (id, nama, kode, alamat, npsn, nama_kepala, no_hp_kepala, logo_url, is_active, created_at, updated_at)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-		`);
+		await db.execute({
+			sql: `
+				INSERT INTO sekolah (id, nama, kode, alamat, npsn, nama_kepala, no_hp_kepala, logo_url, is_active, created_at, updated_at)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			`,
+			args: [
+				id,
+				data.nama,
+				data.kode.toUpperCase(),
+				data.alamat || null,
+				data.npsn || null,
+				data.namaKepala || null,
+				data.noHpKepala || null,
+				data.logoUrl || null,
+				1,
+				now,
+				now
+			]
+		});
 
-		stmt.run(
-			id,
-			data.nama,
-			data.kode.toUpperCase(),
-			data.alamat || null,
-			data.npsn || null,
-			data.namaKepala || null,
-			data.noHpKepala || null,
-			data.logoUrl || null,
-			1,
-			now,
-			now
-		);
-
-		return this.findById(id)!;
+		const sekolah = await this.findById(id);
+		return sekolah!;
 	},
 
 	/** Update school */
-	update(id: string, data: SekolahUpdateDTO): Sekolah | null {
+	async update(id: string, data: SekolahUpdateDTO): Promise<Sekolah | null> {
 		const now = new Date().toISOString();
 		const updates: string[] = [];
-		const values: any[] = [];
+		const values: (string | number | null)[] = [];
 
 		if (data.nama !== undefined) {
 			updates.push('nama = ?');
@@ -156,71 +166,84 @@ export const Sekolah = {
 		}
 
 		if (updates.length === 0) {
-			return this.findById(id);
+			return await this.findById(id);
 		}
 
 		updates.push('updated_at = ?');
 		values.push(now);
 		values.push(id);
 
-		const stmt = db.prepare(`
-			UPDATE sekolah
-			SET ${updates.join(', ')}
-			WHERE id = ?
-		`);
+		await db.execute({
+			sql: `
+				UPDATE sekolah
+				SET ${updates.join(', ')}
+				WHERE id = ?
+			`,
+			args: values
+		});
 
-		stmt.run(...values);
-
-		return this.findById(id);
+		return await this.findById(id);
 	},
 
 	/** Delete school (soft delete by setting is_active = 0) */
-	softDelete(id: string): boolean {
+	async softDelete(id: string): Promise<boolean> {
 		const now = new Date().toISOString();
-		const stmt = db.prepare(`
-			UPDATE sekolah
-			SET is_active = 0, updated_at = ?
-			WHERE id = ?
-		`);
-		const result = stmt.run(now, id);
-		return result.changes > 0;
+		const result = await db.execute({
+			sql: `
+				UPDATE sekolah
+				SET is_active = 0, updated_at = ?
+				WHERE id = ?
+			`,
+			args: [now, id]
+		});
+		return result.rowsAffected > 0;
 	},
 
 	/** Hard delete school (use with caution) */
-	delete(id: string): boolean {
-		const stmt = db.prepare('DELETE FROM sekolah WHERE id = ?');
-		const result = stmt.run(id);
-		return result.changes > 0;
+	async delete(id: string): Promise<boolean> {
+		const result = await db.execute({
+			sql: 'DELETE FROM sekolah WHERE id = ?',
+			args: [id]
+		});
+		return result.rowsAffected > 0;
 	},
 
 	/** Get school statistics */
-	getStats(sekolahId: string): {
+	async getStats(sekolahId: string): Promise<{
 		totalUsers: number;
 		totalSiswa: number;
 		totalTransaksi: number;
 		totalKategori: number;
-	} {
-		const totalUsers = db.prepare(
-			'SELECT COUNT(*) as count FROM user WHERE sekolah_id = ?'
-		).get(sekolahId) as { count: number };
+	}> {
+		const totalUsersResult = await db.execute({
+			sql: 'SELECT COUNT(*) as count FROM user WHERE sekolah_id = ?',
+			args: [sekolahId]
+		});
+		const totalUsers = (totalUsersResult.rows[0] as any).count;
 
-		const totalSiswa = db.prepare(
-			'SELECT COUNT(*) as count FROM siswa WHERE sekolah_id = ?'
-		).get(sekolahId) as { count: number };
+		const totalSiswaResult = await db.execute({
+			sql: 'SELECT COUNT(*) as count FROM siswa WHERE sekolah_id = ?',
+			args: [sekolahId]
+		});
+		const totalSiswa = (totalSiswaResult.rows[0] as any).count;
 
-		const totalTransaksi = db.prepare(
-			'SELECT COUNT(*) as count FROM transaksi WHERE sekolah_id = ?'
-		).get(sekolahId) as { count: number };
+		const totalTransaksiResult = await db.execute({
+			sql: 'SELECT COUNT(*) as count FROM transaksi WHERE sekolah_id = ?',
+			args: [sekolahId]
+		});
+		const totalTransaksi = (totalTransaksiResult.rows[0] as any).count;
 
-		const totalKategori = db.prepare(
-			'SELECT COUNT(*) as count FROM kategori WHERE sekolah_id = ?'
-		).get(sekolahId) as { count: number };
+		const totalKategoriResult = await db.execute({
+			sql: 'SELECT COUNT(*) as count FROM kategori WHERE sekolah_id = ?',
+			args: [sekolahId]
+		});
+		const totalKategori = (totalKategoriResult.rows[0] as any).count;
 
 		return {
-			totalUsers: totalUsers.count,
-			totalSiswa: totalSiswa.count,
-			totalTransaksi: totalTransaksi.count,
-			totalKategori: totalKategori.count,
+			totalUsers,
+			totalSiswa,
+			totalTransaksi,
+			totalKategori,
 		};
 	},
 };

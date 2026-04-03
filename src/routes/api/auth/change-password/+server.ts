@@ -46,7 +46,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			);
 		}
 
-		const user = User.findByIdRaw(session.user_id);
+		const user = await User.findByIdRaw(session.user_id);
 
 		if (!user) {
 			return json(
@@ -59,7 +59,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		}
 
 		// Check current password
-		if (!User.checkPassword(user, currentPassword)) {
+		if (!(await User.checkPassword(user, currentPassword))) {
 			return json(
 				{
 					success: false,
@@ -70,7 +70,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		}
 
 		// Set new password
-		User.updatePassword(user.id, newPassword);
+		await User.updatePassword(user.id, newPassword);
 
 		return json(
 			{

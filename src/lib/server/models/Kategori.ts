@@ -1,5 +1,5 @@
 /**
- * Kategori Model
+ * Kategori Model (Async for Turso/LibSQL)
  */
 import db from '$lib/server/db';
 import { v4 as uuidv4 } from 'uuid';
@@ -33,50 +33,65 @@ export const Kategori = {
 	},
 
 	/** Get all kategori */
-	getAll(): Kategori[] {
-		const stmt = db.prepare('SELECT * FROM kategori ORDER BY nama');
-		return stmt.all() as Kategori[];
+	async getAll(): Promise<Kategori[]> {
+		const result = await db.execute('SELECT * FROM kategori ORDER BY nama');
+		return result.rows as unknown as Kategori[];
 	},
 
 	/** Get kategori by sekolah_id */
-	getBySekolah(sekolahId: string): Kategori[] {
-		const stmt = db.prepare('SELECT * FROM kategori WHERE sekolah_id = ? ORDER BY nama');
-		return stmt.all(sekolahId) as Kategori[];
+	async getBySekolah(sekolahId: string): Promise<Kategori[]> {
+		const result = await db.execute({
+			sql: 'SELECT * FROM kategori WHERE sekolah_id = ? ORDER BY nama',
+			args: [sekolahId]
+		});
+		return result.rows as unknown as Kategori[];
 	},
 
 	/** Get kategori by ID */
-	findById(id: string): Kategori | null {
-		const stmt = db.prepare('SELECT * FROM kategori WHERE id = ?');
-		return stmt.get(id) as Kategori | null;
+	async findById(id: string): Promise<Kategori | null> {
+		const result = await db.execute({
+			sql: 'SELECT * FROM kategori WHERE id = ?',
+			args: [id]
+		});
+		if (result.rows.length === 0) return null;
+		return result.rows[0] as unknown as Kategori;
 	},
 
 	/** Get kategori by nama */
-	findByNama(nama: string): Kategori | null {
-		const stmt = db.prepare('SELECT * FROM kategori WHERE nama = ?');
-		return stmt.get(nama) as Kategori | null;
+	async findByNama(nama: string): Promise<Kategori | null> {
+		const result = await db.execute({
+			sql: 'SELECT * FROM kategori WHERE nama = ?',
+			args: [nama]
+		});
+		if (result.rows.length === 0) return null;
+		return result.rows[0] as unknown as Kategori;
 	},
 
 	/** Create new kategori */
-	create(data: { nama: string; ikon?: string; warna?: string; sekolah_id?: string | null }): Kategori {
+	async create(data: { nama: string; ikon?: string; warna?: string; sekolah_id?: string | null }): Promise<Kategori> {
 		const id = uuidv4();
 		const ikon = data.ikon || 'Heart';
 		const warna = data.warna || '#10b981';
 		const sekolah_id = data.sekolah_id || null;
 
-		const stmt = db.prepare(`
-			INSERT INTO kategori (id, nama, ikon, warna, sekolah_id)
-			VALUES (?, ?, ?, ?, ?)
-		`);
+		await db.execute({
+			sql: `
+				INSERT INTO kategori (id, nama, ikon, warna, sekolah_id)
+				VALUES (?, ?, ?, ?, ?)
+			`,
+			args: [id, data.nama, ikon, warna, sekolah_id]
+		});
 
-		stmt.run(id, data.nama, ikon, warna, sekolah_id);
-
-		return this.findById(id)!;
+		const kategori = await this.findById(id);
+		return kategori!;
 	},
 
 	/** Delete kategori */
-	delete(id: string): boolean {
-		const stmt = db.prepare('DELETE FROM kategori WHERE id = ?');
-		const result = stmt.run(id);
-		return result.changes > 0;
+	async delete(id: string): Promise<boolean> {
+		const result = await db.execute({
+			sql: 'DELETE FROM kategori WHERE id = ?',
+			args: [id]
+		});
+		return result.rowsAffected > 0;
 	},
 };

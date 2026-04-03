@@ -35,7 +35,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		}
 
 		// Find user by email
-		const user = User.findByEmail(email);
+		const user = await User.findByEmail(email);
 
 		if (!user) {
 			return json(
@@ -48,7 +48,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		}
 
 		// Check password
-		if (!User.checkPassword(user, password)) {
+		if (!(await User.checkPassword(user, password))) {
 			return json(
 				{
 					success: false,

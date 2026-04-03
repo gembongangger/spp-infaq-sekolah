@@ -6,6 +6,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { User } from '$lib/server/models/User';
 import { v4 as uuidv4 } from 'uuid';
+import db from '$lib/server/db';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
@@ -34,12 +35,12 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		// Find user by email (without active check for reset)
-		const stmt = import('$lib/server/db').then((m) => m.default);
-		const db = await stmt;
+		const result = await db.execute({
+			sql: 'SELECT * FROM user WHERE email = ?',
+			args: [email]
+		});
 		
-		const user = db.prepare('SELECT * FROM user WHERE email = ?').get(email) as any;
-
-		if (!user) {
+		if (result.rows.length === 0) {
 			return json(
 				{
 					success: false,
@@ -49,11 +50,13 @@ export const POST: RequestHandler = async ({ request }) => {
 			);
 		}
 
+		const user = result.rows[0] as any;
+
 		// Generate temporary password
 		const tempPassword = uuidv4().slice(0, 8).toUpperCase();
 
 		// Set new password
-		User.updatePassword(user.id, tempPassword);
+		await User.updatePassword(user.id, tempPassword);
 
 		// In production, send this via email
 		// For now, return it in response (only for demo)

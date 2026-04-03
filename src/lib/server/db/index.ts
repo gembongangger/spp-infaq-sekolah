@@ -1,57 +1,33 @@
-/**
- * Database connection using BetterSQLite3
- * Supports multiple environments: local, Railway, production
- */
-import Database from 'better-sqlite3';
+import { createClient } from '@libsql/client';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 
+/**
+ * Turso Database Client
+ * Support both local SQLite file and remote Turso database
+ */
+
+// Determine the local database path as a fallback
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const localDbPath = path.resolve(process.cwd(), 'data/infaq_jariyah.db');
 
-// Get database path from environment or use default
-const envDbPath = process.env.DATABASE_PATH;
-
-// Try multiple possible paths for database file
-const possiblePaths = envDbPath
-	? [envDbPath]
-	: [
-		// Railway: /app/data/infaq_jariyah.db
-		'/app/data/infaq_jariyah.db',
-		// Production: relative to build output
-		path.resolve(__dirname, '../../../../data/infaq_jariyah.db'),
-		// Development: relative to src/lib/server
-		path.resolve(__dirname, '../../../../../data/infaq_jariyah.db'),
-		// Fallback: relative to current working directory
-		path.resolve(process.cwd(), 'data/infaq_jariyah.db'),
-	];
-
-let dbPath = possiblePaths.find((p) => {
-	try {
-		return fs.existsSync(p);
-	} catch {
-		return false;
-	}
-});
-
-// If no existing database found, use the Railway path or production path
-if (!dbPath) {
-	dbPath = envDbPath || '/app/data/infaq_jariyah.db';
-}
-
-// Ensure directory exists
-const dbDir = path.dirname(dbPath);
+// Ensure directory exists for local database
+const dbDir = path.dirname(localDbPath);
 if (!fs.existsSync(dbDir)) {
 	fs.mkdirSync(dbDir, { recursive: true });
 }
 
-// Initialize database connection
-const db = new Database(dbPath);
+// Get connection details from environment
+// If TURSO_CONNECTION_URL is missing, use local file
+const url = process.env.TURSO_CONNECTION_URL || `file:${localDbPath}`;
+const authToken = process.env.TURSO_AUTH_TOKEN || '';
 
-// Enable foreign keys
-db.pragma('foreign_keys = ON');
+console.log(`Connecting to database at: ${url.startsWith('file:') ? 'local file' : 'Turso remote'}`);
 
-// Set journal mode for better concurrency (WAL for local, DELETE for Railway volume)
-db.pragma('journal_mode = WAL');
+const db = createClient({
+	url: url,
+	authToken: authToken,
+});
 
 export default db;

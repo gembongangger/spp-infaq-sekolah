@@ -53,93 +53,111 @@ export const User = {
 	},
 
 	/** Find user by email or username */
-	findByEmail(identifier: string): User | null {
-		const stmt = db.prepare('SELECT * FROM user WHERE (email = ? OR username = ?) AND is_active = 1');
-		return stmt.get(identifier, identifier) as User | null;
+	async findByEmail(identifier: string): Promise<User | null> {
+		const result = await db.execute({
+			sql: 'SELECT * FROM user WHERE (email = ? OR username = ?) AND is_active = 1',
+			args: [identifier, identifier]
+		});
+		if (result.rows.length === 0) return null;
+		return result.rows[0] as unknown as User;
 	},
 
 	/** Find user by ID */
-	findById(id: string): User | null {
-		const stmt = db.prepare('SELECT * FROM user WHERE id = ? AND is_active = 1');
-		return stmt.get(id) as User | null;
+	async findById(id: string): Promise<User | null> {
+		const result = await db.execute({
+			sql: 'SELECT * FROM user WHERE id = ? AND is_active = 1',
+			args: [id]
+		});
+		if (result.rows.length === 0) return null;
+		return result.rows[0] as unknown as User;
 	},
 
 	/** Find user by ID without active check */
-	findByIdRaw(id: string): User | null {
-		const stmt = db.prepare('SELECT * FROM user WHERE id = ?');
-		return stmt.get(id) as User | null;
+	async findByIdRaw(id: string): Promise<User | null> {
+		const result = await db.execute({
+			sql: 'SELECT * FROM user WHERE id = ?',
+			args: [id]
+		});
+		if (result.rows.length === 0) return null;
+		return result.rows[0] as unknown as User;
 	},
 
 	/** Create new user */
-	create(data: { username: string; email: string; password: string; role?: string; sekolah_id?: string | null }): User {
+	async create(data: { username: string; email: string; password: string; role?: string; sekolah_id?: string | null }): Promise<User> {
 		const id = uuidv4();
-		const password_hash = bcrypt.hashSync(data.password, 10);
+		const password_hash = await bcrypt.hash(data.password, 10);
 		const now = new Date().toISOString();
 		const role = data.role || 'admin';
 		const is_active = 1;
 		const sekolah_id = data.sekolah_id || null;
 
-		const stmt = db.prepare(`
-			INSERT INTO user (id, username, email, password_hash, role, sekolah_id, is_active, created_at, updated_at)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-		`);
+		await db.execute({
+			sql: `
+				INSERT INTO user (id, username, email, password_hash, role, sekolah_id, is_active, created_at, updated_at)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+			`,
+			args: [id, data.username, data.email, password_hash, role, sekolah_id, is_active, now, now]
+		});
 
-		stmt.run(id, data.username, data.email, password_hash, role, sekolah_id, is_active, now, now);
-
-		return this.findByIdRaw(id)!;
+		const user = await this.findByIdRaw(id);
+		return user!;
 	},
 
 	/** Update user password */
-	updatePassword(id: string, newPassword: string): boolean {
-		const password_hash = bcrypt.hashSync(newPassword, 10);
+	async updatePassword(id: string, newPassword: string): Promise<boolean> {
+		const password_hash = await bcrypt.hash(newPassword, 10);
 		const now = new Date().toISOString();
 
-		const stmt = db.prepare(`
-			UPDATE user 
-			SET password_hash = ?, updated_at = ?
-			WHERE id = ?
-		`);
-
-		const result = stmt.run(password_hash, now, id);
-		return result.changes > 0;
+		const result = await db.execute({
+			sql: `
+				UPDATE user
+				SET password_hash = ?, updated_at = ?
+				WHERE id = ?
+			`,
+			args: [password_hash, now, id]
+		});
+		return result.rowsAffected > 0;
 	},
 
 	/** Check password */
-	checkPassword(user: User, password: string): boolean {
-		return bcrypt.compareSync(password, user.password_hash);
+	async checkPassword(user: User, password: string): Promise<boolean> {
+		return await bcrypt.compare(password, user.password_hash);
 	},
 
 	/** Get all users */
-	getAll(): User[] {
-		const stmt = db.prepare('SELECT * FROM user ORDER BY created_at DESC');
-		return stmt.all() as User[];
+	async getAll(): Promise<User[]> {
+		const result = await db.execute('SELECT * FROM user ORDER BY created_at DESC');
+		return result.rows as unknown as User[];
 	},
 
 	/** Get users by sekolah_id */
-	getBySekolah(sekolahId: string): User[] {
-		const stmt = db.prepare('SELECT * FROM user WHERE sekolah_id = ? ORDER BY created_at DESC');
-		return stmt.all(sekolahId) as User[];
+	async getBySekolah(sekolahId: string): Promise<User[]> {
+		const result = await db.execute({
+			sql: 'SELECT * FROM user WHERE sekolah_id = ? ORDER BY created_at DESC',
+			args: [sekolahId]
+		});
+		return result.rows as unknown as User[];
 	},
 
 	/** Get all users with school info */
-	getAllWithSekolah(): Array<User & { sekolah_nama: string | null }> {
-		const stmt = db.prepare(`
-			SELECT user.*, sekolah.nama as sekolah_nama 
-			FROM user 
-			LEFT JOIN sekolah ON user.sekolah_id = sekolah.id 
+	async getAllWithSekolah(): Promise<Array<User & { sekolah_nama: string | null }>> {
+		const result = await db.execute(`
+			SELECT user.*, sekolah.nama as sekolah_nama
+			FROM user
+			LEFT JOIN sekolah ON user.sekolah_id = sekolah.id
 			ORDER BY user.created_at DESC
 		`);
-		return stmt.all() as Array<User & { sekolah_nama: string | null }>;
+		return result.rows as unknown as Array<User & { sekolah_nama: string | null }>;
 	},
 
 	/** Update user profile */
-	updateProfile(
+	async updateProfile(
 		id: string,
 		data: { nama_lengkap?: string | null; no_hp?: string | null; foto_url?: string | null }
-	): boolean {
+	): Promise<boolean> {
 		const now = new Date().toISOString();
 		const fields: string[] = [];
-		const values: any[] = [];
+		const values: (string | null)[] = [];
 
 		if (data.nama_lengkap !== undefined) {
 			fields.push('nama_lengkap = ?');
@@ -162,13 +180,14 @@ export const User = {
 		values.push(now);
 		values.push(id);
 
-		const stmt = db.prepare(`
-			UPDATE user
-			SET ${fields.join(', ')}
-			WHERE id = ?
-		`);
-
-		const result = stmt.run(...values);
-		return result.changes > 0;
+		const result = await db.execute({
+			sql: `
+				UPDATE user
+				SET ${fields.join(', ')}
+				WHERE id = ?
+			`,
+			args: values
+		});
+		return result.rowsAffected > 0;
 	},
 };

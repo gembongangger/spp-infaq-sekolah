@@ -1,0 +1,21 @@
+[build]
+  command = "npm run build"
+  publish = "build"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/server"
+  status = 200
+
+[dev]
+  command = "npm run dev"
+  port = 5173
+  publish = "build"
+
+# Environment variables should be set in Netlify dashboard
+# TURSO_CONNECTION_URL - Your Turso database connection URL
+# TURSO_AUTH_TOKEN - Your Turso authentication token
+# SESSION_SECRET - Random string for session encryption

@@ -7,7 +7,7 @@ import { Kategori } from '$lib/server/models/Kategori';
 
 export const DELETE: RequestHandler = async ({ params }) => {
 	try {
-		const kategori = Kategori.findById(params.id);
+		const kategori = await Kategori.findById(params.id);
 
 		if (!kategori) {
 			return json(
@@ -19,7 +19,7 @@ export const DELETE: RequestHandler = async ({ params }) => {
 			);
 		}
 
-		Kategori.delete(params.id);
+		await Kategori.delete(params.id);
 
 		return json(
 			{

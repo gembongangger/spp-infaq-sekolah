@@ -9,7 +9,7 @@ import { Transaksi } from '$lib/server/models/Transaksi';
 
 export const GET: RequestHandler = async ({ params }) => {
 	try {
-		const transaksi = Transaksi.findById(params.id);
+		const transaksi = await Transaksi.findById(params.id);
 
 		if (!transaksi) {
 			return json(
@@ -41,7 +41,7 @@ export const GET: RequestHandler = async ({ params }) => {
 
 export const PUT: RequestHandler = async ({ params, request }) => {
 	try {
-		const transaksi = Transaksi.findById(params.id);
+		const transaksi = await Transaksi.findById(params.id);
 
 		if (!transaksi) {
 			return json(
@@ -75,7 +75,7 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 		if (data.nomorAkun !== undefined) updateData.nomor_akun = data.nomorAkun || null;
 		if (data.bulan !== undefined) updateData.bulan = data.bulan || null;
 
-		const updated = Transaksi.update(params.id, updateData as any);
+		const updated = await Transaksi.update(params.id, updateData as any);
 
 		if (!updated) {
 			return json(
@@ -108,7 +108,7 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 
 export const DELETE: RequestHandler = async ({ params }) => {
 	try {
-		const transaksi = Transaksi.findById(params.id);
+		const transaksi = await Transaksi.findById(params.id);
 
 		if (!transaksi) {
 			return json(
@@ -120,7 +120,7 @@ export const DELETE: RequestHandler = async ({ params }) => {
 			);
 		}
 
-		Transaksi.delete(params.id);
+		await Transaksi.delete(params.id);
 
 		return json(
 			{

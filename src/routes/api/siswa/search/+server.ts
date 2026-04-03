@@ -10,17 +10,17 @@ export const GET: RequestHandler = async ({ url }) => {
 		const query = url.searchParams.get('q') || '';
 		const page = parseInt(url.searchParams.get('page') || '1');
 		const limit = parseInt(url.searchParams.get('limit') || '20');
-		
+
 		console.log('[API Search] Query:', { q: query, page, limit, fullUrl: url.toString() });
-		
+
 		const offset = (page - 1) * limit;
 
-		const result = Siswa.search({
+		const result = await Siswa.search({
 			query,
 			limit,
 			offset
 		});
-		
+
 		// Convert snake_case to camelCase for frontend
 		const students = result.students.map(s => ({
 			id: s.id,
