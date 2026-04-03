@@ -19,6 +19,7 @@
 	// Props Svelte 5
 	interface Props {
 		onEdit?: (student: SiswaData) => void;
+		refreshKey?: number;
 		cardBg?: string;
 		cardBorder?: string;
 		tableHeaderBg?: string;
@@ -33,6 +34,7 @@
 
 	let {
 		onEdit,
+		refreshKey = 0,
 		cardBg = currentTheme === 'dark' ? 'bg-[#1e293b]' : 'bg-white',
 		cardBorder = currentTheme === 'dark' ? 'border-[#334155]' : 'border-slate-200',
 		tableHeaderBg = currentTheme === 'dark' ? 'bg-[#0f172a]' : 'bg-slate-100',
@@ -85,9 +87,10 @@
 		fetchStudents(searchQuery, page);
 	}
 
-	// Initial load
+	// Initial load and external refresh trigger
 	$effect(() => {
-		fetchStudents('', 1);
+		refreshKey;
+		fetchStudents(searchQuery, currentPage);
 	});
 
 	async function handleDeleteStudent(id: string) {

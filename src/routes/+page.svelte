@@ -19,6 +19,7 @@
 	let showLogoutModal = $state(false);
 	let showProfileModal = $state(false);
 	let currentTheme = $derived($theme);
+	let studentTableRefreshKey = $state(0);
 	let dataLoaded = $state({
 		stats: false,
 		students: false,
@@ -116,6 +117,10 @@
 
 	function switchTab(tab: string) {
 		activeTab.set(tab);
+	}
+
+	function refreshStudentTable() {
+		studentTableRefreshKey += 1;
 	}
 
 	function queueDataLoad(
@@ -308,11 +313,11 @@
 		<div class="fade-in">
 			{#await studentFormPromise then module}
 				{@const StudentForm = module.default}
-				<StudentForm bind:this={studentForm} />
+				<StudentForm bind:this={studentForm} onSaved={refreshStudentTable} />
 			{/await}
 			{#await studentTablePromise then module}
 				{@const StudentTable = module.default}
-				<StudentTable onEdit={handleEditStudent} />
+				<StudentTable onEdit={handleEditStudent} refreshKey={studentTableRefreshKey} />
 			{/await}
 		</div>
 	{/if}

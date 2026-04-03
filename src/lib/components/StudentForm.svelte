@@ -25,6 +25,7 @@
 	
 	// Props for theme-aware styling
 	interface Props {
+		onSaved?: () => void;
 		cardBg?: string;
 		cardBorder?: string;
 		inputBg?: string;
@@ -38,6 +39,7 @@
 	}
 
 	let { 
+		onSaved,
 		cardBg = currentTheme === 'dark' ? 'bg-[#1e293b]' : 'bg-white',
 		cardBorder = currentTheme === 'dark' ? 'border-[#334155]' : 'border-slate-200',
 		inputBg = currentTheme === 'dark' ? 'bg-[#0f172a]' : 'bg-white',
@@ -70,6 +72,8 @@
 			} else {
 				await addStudent({ nomorAkun, nama, kelas });
 			}
+			await loadStudents();
+			onSaved?.();
 			// Reset form
 			nomorAkun = '';
 			nama = '';
