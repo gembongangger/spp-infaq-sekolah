@@ -20,6 +20,7 @@
     "@tailwindcss/vite": "^4.1.14",
     "bcryptjs": "^3.0.3",
     "chart.js": "^4.5.1",
+    "dotenv": "^16.4.5",
     "lucide-svelte": "^0.475.0",
     "svelte": "^5.55.1",
     "tailwindcss": "^4.1.14",
@@ -29,7 +30,6 @@
   "devDependencies": {
     "@sveltejs/adapter-netlify": "^6.0.4",
     "@sveltejs/adapter-node": "^5.5.4",
-    "@sveltejs/eslint-config": "^7.0.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22.14.0",
     "@types/uuid": "^10.0.0",

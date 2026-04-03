@@ -43,6 +43,8 @@ declare module '$env/static/private' {
 	export const NODE_ENV: string;
 	export const PORT: string;
 	export const MAX_FILE_SIZE: string;
+	export const TURSO_CONNECTION_URL: string;
+	export const TURSO_AUTH_TOKEN: string;
 	export const SHELL: string;
 	export const npm_command: string;
 	export const SESSION_MANAGER: string;
@@ -249,6 +251,8 @@ declare module '$env/dynamic/private' {
 		NODE_ENV: string;
 		PORT: string;
 		MAX_FILE_SIZE: string;
+		TURSO_CONNECTION_URL: string;
+		TURSO_AUTH_TOKEN: string;
 		SHELL: string;
 		npm_command: string;
 		SESSION_MANAGER: string;
