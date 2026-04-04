@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Edit2, Trash2, Users, ChevronLeft, ChevronRight } from 'lucide-svelte';
+	import { Edit2, Trash2, Users, ChevronLeft, ChevronRight, Search } from 'lucide-svelte';
 	import { deleteStudent } from '$lib/stores';
 	import { siswaApi } from '$lib/api';
 	import type { SiswaData } from '$lib/api';
@@ -10,11 +10,11 @@
 	
 	// Pagination state
 	let searchQuery = $state('');
+	let searchTriggered = $state(false);
 	let currentPage = $state(1);
 	let pagination = $state({ page: 1, limit: 20, total: 0, hasMore: false, totalPages: 0 });
 	let students = $state<SiswaData[]>([]);
 	let isLoading = $state(false);
-	let searchTimeout: any = null;
 
 	// Props Svelte 5
 	interface Props {
@@ -67,18 +67,13 @@
 		}
 	}
 
-	// Debounced search handler
-	function handleSearchInput(value: string) {
-		searchQuery = value;
-		
-		if (searchTimeout) {
-			clearTimeout(searchTimeout);
-		}
-		
-		searchTimeout = setTimeout(() => {
-			currentPage = 1;
-			fetchStudents(value, 1);
-		}, 300);
+	// Manual search with button
+	function handleSearch() {
+		searchTriggered = true;
+		currentPage = 1;
+		students = [];
+		isLoading = true;
+		fetchStudents(searchQuery, 1);
 	}
 
 	// Handle page change
@@ -87,10 +82,22 @@
 		fetchStudents(searchQuery, page);
 	}
 
-	// Initial load and external refresh trigger
+	// Handle refresh from parent (e.g., after adding new student)
+	function handleRefresh() {
+		if (searchTriggered) {
+			fetchStudents(searchQuery, currentPage);
+		}
+	}
+
+	let lastRefreshKey = $state(0);
+	
+	// Watch for external refresh trigger (only when refreshKey changes from parent)
 	$effect(() => {
 		refreshKey;
-		fetchStudents(searchQuery, currentPage);
+		if (refreshKey !== lastRefreshKey && refreshKey > 0) {
+			lastRefreshKey = refreshKey;
+			handleRefresh();
+		}
 	});
 
 	async function handleDeleteStudent(id: string) {
@@ -125,21 +132,31 @@
 				{/if}
 			</div>
 		</div>
-		<div class="mt-3 relative">
+		<div class="flex gap-2">
 			<input
 				type="text"
 				value={searchQuery}
-				oninput={(e) => handleSearchInput(e.currentTarget.value)}
+				oninput={(e) => searchQuery = e.currentTarget.value}
+				onkeydown={(e) => e.key === 'Enter' && handleSearch()}
 				placeholder="Cari nama, nomor akun, atau kelas..."
-				class="w-full pl-4 pr-12 py-2.5 rounded-xl text-sm {currentTheme === 'dark' ? 'bg-[#0f172a] border-[#334155] text-[#f1f5f9] placeholder:text-[#475569]' : 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400'} focus:outline-none focus:ring-2 focus:ring-[#10b981] border"
+				class="flex-1 pl-4 pr-4 py-2.5 rounded-xl text-sm {currentTheme === 'dark' ? 'bg-[#0f172a] border-[#334155] text-[#f1f5f9] placeholder:text-[#475569]' : 'bg-slate-50 border-slate-500 text-slate-900 placeholder:text-slate-500'} focus:outline-none focus:ring-2 focus:ring-[#10b981] border shadow-sm"
 			/>
-			{#if searchQuery}
+			<button
+				type="button"
+				onclick={handleSearch}
+				class="px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 bg-[#10b981] text-white hover:bg-[#059669] transition-colors"
+			>
+				<Search size={16} />
+				<span>Cari</span>
+			</button>
+			{#if searchQuery || students.length > 0}
 				<button
 					type="button"
-					onclick={() => { searchQuery = ''; handleSearchInput(''); }}
-					class="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-[#334155] rounded-full {textMuted}"
+					onclick={() => { searchQuery = ''; searchTriggered = false; students = []; }}
+					class="p-2.5 rounded-xl text-sm {currentTheme === 'dark' ? 'bg-[#334155] text-[#94a3b8] hover:bg-[#475569]' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'} transition-colors"
+					title="Clear"
 				>
-					<Users size={14} />
+					<Users size={16} />
 				</button>
 			{/if}
 		</div>
@@ -242,10 +259,10 @@
 				<Users size={28} color="#475569" />
 			</div>
 			<p class="text-sm {textMuted}">
-				{searchQuery ? `Tidak ditemukan siswa dengan "${searchQuery}"` : 'Belum ada data siswa'}
+				{searchTriggered && searchQuery ? `Tidak ditemukan siswa dengan "${searchQuery}"` : 'Belum ada data siswa'}
 			</p>
 			<p class="text-xs mt-1 {currentTheme === 'dark' ? 'text-[#334155]' : 'text-slate-400'}">
-				{searchQuery ? 'Coba kata kunci lain' : 'Tambahkan identitas siswa melalui form di atas'}
+				{searchTriggered && searchQuery ? 'Coba kata kunci lain' : 'Lakukan input pencarian dengan tombol Cari'}
 			</p>
 		</div>
 	{/if}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { List, Edit2, Trash2, ChevronLeft, ChevronRight, Download } from 'lucide-svelte';
+	import { List, Edit2, Trash2, ChevronLeft, ChevronRight, Download, Search, X } from 'lucide-svelte';
 	import { formatRupiah, formatDate } from '$lib/utils';
 	import type { TransaksiData } from '$lib/types';
 
@@ -35,30 +35,57 @@
 		currentTheme
 	}: Props = $props();
 
+	// Internal filter state (before apply)
+	let searchQuery = $state('');
+	let localFilterKategori = $state('');
+	let localFilterTanggalMulai = $state('');
+	let localFilterTanggalSelesai = $state('');
+	let searchTriggered = $state(false);
+
 	// Pagination state
 	let currentPage = $state(1);
 	const itemsPerPage = 5;
 
-	// Reset page when filters change
+	// Reset page when searchTriggered changes
 	$effect(() => {
-		filterKategori;
-		filterTanggalMulai;
-		filterTanggalSelesai;
+		searchTriggered;
 		currentPage = 1;
 	});
 
-	const totalPages = $derived(Math.ceil(filteredTransactions.length / itemsPerPage));
+	const totalPages = $derived(Math.ceil(displayTransactions.length / itemsPerPage));
 	const paginatedTransactions = $derived(
-		filteredTransactions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+		displayTransactions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 	);
+
+	// Only show transactions when search has been triggered
+	let displayTransactions = $derived(searchTriggered ? filteredTransactions : []);
+
+	// Apply filters with button
+	function handleSearch() {
+		searchTriggered = true;
+		onFilterKategoriChange(localFilterKategori);
+		onFilterTanggalMulaiChange(localFilterTanggalMulai);
+		onFilterTanggalSelesaiChange(localFilterTanggalSelesai);
+	}
+
+	// Reset filters and clear trigger
+	function handleReset() {
+		searchQuery = '';
+		localFilterKategori = '';
+		localFilterTanggalMulai = '';
+		localFilterTanggalSelesai = '';
+		searchTriggered = false;
+		onResetFilter();
+	}
 
 	const cardBg = $derived(currentTheme === 'dark' ? 'bg-[#1e293b]' : 'bg-white');
 	const cardBorder = $derived(currentTheme === 'dark' ? 'border-[#334155]' : 'border-slate-200');
-	const inputBg = $derived(currentTheme === 'dark' ? 'bg-[#0f172a]' : 'bg-white');
-	const inputBorder = $derived(currentTheme === 'dark' ? 'border-[#334155]' : 'border-slate-300');
+	const inputBg = $derived(currentTheme === 'dark' ? 'bg-[#0f172a]' : 'bg-slate-50');
+	const inputBorder = $derived(currentTheme === 'dark' ? 'border-[#334155]' : 'border-slate-500');
 	const inputText = $derived(currentTheme === 'dark' ? 'text-[#f1f5f9]' : 'text-slate-900');
 	const labelColor = $derived(currentTheme === 'dark' ? 'text-[#64748b]' : 'text-slate-600');
 	const textMuted = $derived(currentTheme === 'dark' ? 'text-[#94a3b8]' : 'text-slate-500');
+	const inputPlaceholder = $derived(currentTheme === 'dark' ? 'placeholder:text-[#475569]' : 'placeholder:text-slate-500');
 	const textSecondary = $derived(currentTheme === 'dark' ? 'text-[#cbd5e1]' : 'text-slate-700');
 	const tableHeaderBg = $derived(currentTheme === 'dark' ? 'bg-[#0f172a]' : 'bg-slate-100');
 	const tableHeaderBorder = $derived(currentTheme === 'dark' ? 'border-[#1e293b]' : 'border-slate-200');
@@ -104,7 +131,7 @@
 		<div class="flex items-center justify-between mb-4">
 			<h2 class="text-sm font-semibold {textMuted}">
 				<List size={16} class="inline mr-1" />
-				Daftar Transaksi ({filteredTransactions.length})
+				Daftar Transaksi ({displayTransactions.length})
 			</h2>
 			{#if totalPages > 1}
 				<div class="flex items-center gap-2">
@@ -136,8 +163,8 @@
 			<div>
 				<label class="block text-xs font-medium mb-1.5 {labelColor}">Kategori</label>
 				<select
-					value={filterKategori}
-					onchange={(e) => onFilterKategoriChange(e.currentTarget.value)}
+					value={localFilterKategori}
+					onchange={(e) => localFilterKategori = e.currentTarget.value}
 					class="w-full px-3 py-2.5 rounded-xl text-sm {inputBg} {inputBorder} {inputText}"
 				>
 					<option value="">Semua Kategori</option>
@@ -150,8 +177,8 @@
 				<label class="block text-xs font-medium mb-1.5 {labelColor}">Tanggal Mulai</label>
 				<input
 					type="date"
-					value={filterTanggalMulai}
-					oninput={(e) => onFilterTanggalMulaiChange(e.currentTarget.value)}
+					value={localFilterTanggalMulai}
+					oninput={(e) => localFilterTanggalMulai = e.currentTarget.value}
 					class="w-full px-3 py-2.5 rounded-xl text-sm {inputBg} {inputBorder} {inputText}"
 				/>
 			</div>
@@ -159,28 +186,35 @@
 				<label class="block text-xs font-medium mb-1.5 {labelColor}">Tanggal Selesai</label>
 				<input
 					type="date"
-					value={filterTanggalSelesai}
-					oninput={(e) => onFilterTanggalSelesaiChange(e.currentTarget.value)}
+					value={localFilterTanggalSelesai}
+					oninput={(e) => localFilterTanggalSelesai = e.currentTarget.value}
 					class="w-full px-3 py-2.5 rounded-xl text-sm {inputBg} {inputBorder} {inputText}"
 				/>
 			</div>
 			<div class="flex items-end">
 				<button
 					type="button"
-					onclick={onResetFilter}
-					class="w-full px-4 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-br from-[#334155] to-[#475569] text-white"
+					onclick={handleSearch}
+					class="w-full px-4 py-2.5 rounded-xl text-sm font-semibold bg-[#10b981] text-white flex items-center justify-center gap-2 hover:bg-[#059669] transition-colors"
 				>
-					Reset Filter
+					<Search size={16} />
+					Filter
 				</button>
 			</div>
-			<div class="flex items-end">
+			<div class="flex items-end gap-2">
+				<button
+					type="button"
+					onclick={handleReset}
+					class="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold {currentTheme === 'dark' ? 'bg-[#334155] text-[#94a3b8]' : 'bg-slate-200 text-slate-600'} hover:opacity-80 transition-colors"
+				>
+					Reset
+				</button>
 				<button
 					type="button"
 					onclick={exportToExcel}
-					class="w-full px-4 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-br from-[#10b981] to-[#059669] text-white flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
+					class="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-br from-[#10b981] to-[#059669] text-white flex items-center justify-center gap-2 shadow-sm hover:shadow-md transition-all active:scale-[0.98]"
 				>
 					<Download size={16} />
-					Export Excel
 				</button>
 			</div>
 		</div>
@@ -294,7 +328,9 @@
 		{:else}
 			<div class="text-center py-12">
 				<List size={48} class="mx-auto mb-3 {textMuted}" />
-				<p class="{textMuted}">Belum ada transaksi</p>
+				<p class="{textMuted}">
+					{searchTriggered ? 'Tidak ada transaksi untuk filter yang dipilih' : 'Terapkan filter dengan tombol Filter'}
+				</p>
 			</div>
 		{/if}
 	</div>

@@ -26,13 +26,13 @@
 
 	let currentTheme: 'dark' | 'light' = $state('dark');
 	let searchQuery = $state('');
+	let searchTriggered = $state(false);
 	let selectedStudent = $state<Student | null>(null);
 	let showHistory = $state(false);
 	let isLoading = $state(false);
 	let currentPage = $state(1);
 	let pagination = $state({ page: 1, limit: 20, total: 0, hasMore: false, totalPages: 0 });
 	let studentsWithStats = $state<StudentWithStats[]>([]);
-	let searchTimeout = $state(null);
 
 	// Fetch students function
 	async function fetchStudents(query = '', page = 1) {
@@ -93,19 +93,12 @@
 	}
 
 	// Debounced search handler
-	function handleSearchInput(value: string) {
-		searchQuery = value;
-		
-		// Clear existing timeout
-		if (searchTimeout) {
-			clearTimeout(searchTimeout);
-		}
-		
-		// Set new timeout for debounced search
-		searchTimeout = setTimeout(() => {
-			currentPage = 1;
-			fetchStudents(value, 1);
-		}, 300);
+	function handleSearch() {
+		searchTriggered = true;
+		currentPage = 1;
+		studentsWithStats = [];
+		isLoading = true;
+		fetchStudents(searchQuery, 1);
 	}
 
 	// Handle page change
@@ -161,24 +154,22 @@
 		currentTheme = html.classList.contains('dark') ? 'dark' : 'light';
 	});
 
-	// Auth check and initial load
+	// Auth check - don't fetch on mount
 	onMount(async () => {
 		if (!$authStore.isAuthenticated) {
 			goto('/login');
 			return;
 		}
 		await loadTransactions();
-		// Initial fetch - load first page
-		fetchStudents('', 1);
 	});
 
 	// Theme-aware styles
 	const cardBg = $derived(currentTheme === 'dark' ? 'bg-[#1e293b]' : 'bg-white');
 	const cardBorder = $derived(currentTheme === 'dark' ? 'border-[#334155]' : 'border-slate-200');
-	const inputBg = $derived(currentTheme === 'dark' ? 'bg-[#0f172a]' : 'bg-white');
-	const inputBorder = $derived(currentTheme === 'dark' ? 'border-[#334155]' : 'border-slate-300');
+	const inputBg = $derived(currentTheme === 'dark' ? 'bg-[#0f172a]' : 'bg-slate-50');
+	const inputBorder = $derived(currentTheme === 'dark' ? 'border-[#334155]' : 'border-slate-500');
 	const inputText = $derived(currentTheme === 'dark' ? 'text-[#f1f5f9]' : 'text-slate-900');
-	const inputPlaceholder = $derived(currentTheme === 'dark' ? 'placeholder:text-[#475569]' : 'placeholder:text-slate-400');
+	const inputPlaceholder = $derived(currentTheme === 'dark' ? 'placeholder:text-[#475569]' : 'placeholder:text-slate-500');
 	const textMuted = $derived(currentTheme === 'dark' ? 'text-[#94a3b8]' : 'text-slate-500');
 	const textSecondary = $derived(currentTheme === 'dark' ? 'text-[#cbd5e1]' : 'text-slate-700');
 	const tableHeaderBg = $derived(currentTheme === 'dark' ? 'bg-[#0f172a]' : 'bg-slate-100');
@@ -257,26 +248,37 @@
 				<!-- Search Card -->
 				<div class="rounded-2xl overflow-hidden {cardBg} {cardBorder} mb-6">
 					<div class="p-6">
-						<div class="relative">
-							<Search
-								size={20}
-								class="absolute left-4 top-1/2 -translate-y-1/2 {textMuted}"
-							/>
-							<input
-								type="text"
-								value={searchQuery}
-								oninput={(e) => handleSearchInput(e.currentTarget.value)}
-								placeholder="Cari nama siswa, nomor akun, atau kelas..."
-								class="w-full pl-12 pr-12 py-3.5 rounded-xl text-base {inputBg} {inputBorder} {inputText} {inputPlaceholder} focus:outline-none focus:ring-2 focus:ring-[#10b988] transition-all"
-								autofocus
-							/>
-							{#if searchQuery}
+						<div class="flex gap-2">
+							<div class="relative flex-1">
+								<Search
+									size={20}
+									class="absolute left-4 top-1/2 -translate-y-1/2 {textMuted}"
+								/>
+								<input
+									type="text"
+									value={searchQuery}
+									oninput={(e) => searchQuery = e.currentTarget.value}
+									onkeydown={(e) => e.key === 'Enter' && handleSearch()}
+									placeholder="Cari nama siswa, nomor akun, atau kelas..."
+									class="w-full pl-12 pr-4 py-3.5 rounded-xl text-base {inputBg} {inputBorder} {inputText} {inputPlaceholder} focus:outline-none focus:ring-2 focus:ring-[#10b988] transition-all"
+								/>
+							</div>
+							<button
+								type="button"
+								onclick={handleSearch}
+								class="px-5 py-3.5 rounded-xl text-sm font-medium flex items-center gap-2 bg-[#10b981] text-white hover:bg-[#059669] transition-colors"
+							>
+								<Search size={18} />
+								<span>Cari</span>
+							</button>
+							{#if searchTriggered || studentsWithStats.length > 0}
 								<button
 									type="button"
-									onclick={() => { searchQuery = ''; handleSearchInput(''); }}
-									class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-[#334155] rounded-full {textMuted} transition-colors"
+									onclick={() => { searchQuery = ''; searchTriggered = false; studentsWithStats = []; }}
+									class="p-3.5 rounded-xl {currentTheme === 'dark' ? 'bg-[#334155] text-[#94a3b8] hover:bg-[#475569]' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'} transition-colors"
+									title="Clear"
 								>
-									<X size={16} />
+									<X size={18} />
 								</button>
 							{/if}
 						</div>
@@ -287,10 +289,12 @@
 				<div class="rounded-2xl overflow-hidden {cardBg} {cardBorder}">
 					<div class="p-4 border-b {cardBorder} flex items-center justify-between">
 						<p class="text-sm {textMuted}">
-							{#if searchQuery}
+							{#if searchTriggered && searchQuery}
 								Ditemukan {pagination.total} siswa
-							{:else}
+							{:else if searchTriggered && !searchQuery}
 								Total {pagination.total} siswa
+							{:else}
+								Silakan cari siswa
 							{/if}
 						</p>
 						{#if pagination.totalPages > 1}
@@ -391,7 +395,10 @@
 						<div class="py-12 text-center">
 							<User size={48} class="mx-auto mb-3 {textMuted}" />
 							<p class="text-sm {textMuted}">
-								{searchQuery ? `Tidak ditemukan siswa dengan "${searchQuery}"` : 'Belum ada data siswa'}
+								{searchTriggered && searchQuery ? `Tidak ditemukan siswa dengan "${searchQuery}"` : 'Belum ada data siswa'}
+							</p>
+							<p class="text-xs mt-1 {textMuted}">
+								{searchTriggered && searchQuery ? 'Coba kata kunci lain' : 'Lakukan input pencarian dengan tombol Cari'}
 							</p>
 						</div>
 					{/if}

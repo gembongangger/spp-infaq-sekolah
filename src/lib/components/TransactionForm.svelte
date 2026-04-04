@@ -44,10 +44,10 @@
 	let { 
 		cardBg = currentTheme === 'dark' ? 'bg-[#1e293b]' : 'bg-white',
 		cardBorder = currentTheme === 'dark' ? 'border-[#334155]' : 'border-slate-200',
-		inputBg = currentTheme === 'dark' ? 'bg-[#0f172a]' : 'bg-white',
-		inputBorder = currentTheme === 'dark' ? 'border-[#334155]' : 'border-slate-300',
+		inputBg = currentTheme === 'dark' ? 'bg-[#0f172a]' : 'bg-slate-50',
+		inputBorder = currentTheme === 'dark' ? 'border-[#334155]' : 'border-slate-500',
 		inputText = currentTheme === 'dark' ? 'text-[#f1f5f9]' : 'text-slate-900',
-		inputPlaceholder = currentTheme === 'dark' ? 'placeholder:text-[#475569]' : 'placeholder:text-slate-400',
+		inputPlaceholder = currentTheme === 'dark' ? 'placeholder:text-[#475569]' : 'placeholder:text-slate-500',
 		labelColor = currentTheme === 'dark' ? 'text-[#64748b]' : 'text-slate-600',
 		textMuted = currentTheme === 'dark' ? 'text-[#94a3b8]' : 'text-slate-500'
 	}: Props = $props();

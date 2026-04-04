@@ -53,7 +53,7 @@
 	let reportFilteredTransactions = $derived(
 		$transactions.filter(t => {
 			const matchKategori = !reportKategori || t.kategori === reportKategori;
-			const matchNama = !reportNama || t.namaPengirim === reportNama;
+			const matchNama = !reportNama || (t.namaPengirim && t.namaPengirim.toLowerCase().includes(reportNama.toLowerCase()));
 			const matchKelas = !reportKelas || t.kelasPengirim === reportKelas;
 			const matchMetode = !reportMetode || t.metode === reportMetode;
 			const transactionDate = t.tanggal;

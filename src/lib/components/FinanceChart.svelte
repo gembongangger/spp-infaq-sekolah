@@ -75,7 +75,8 @@
 			height: 220,
 			colors,
 			barOptions: {
-				spaceRatio: 0.45
+				spaceRatio: 0.2,
+				barRadius: 20
 			},
 			axisOptions: {
 				xIsSeries: 1,
