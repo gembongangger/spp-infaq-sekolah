@@ -1,37 +1,27 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { tick } from 'svelte';
 	import { transactions, theme } from '$lib/stores';
 	import { formatDate, formatRupiah } from '$lib/utils';
-
-	type ChartPayload = {
-		labels: string[];
-		datasets: Array<{
-			name: string;
-			values: number[];
-		}>;
-	};
-
-	type FrappeChartCtor = new (
-		parent: HTMLElement,
-		options: Record<string, unknown>
-	) => {
-		update: (data: ChartPayload) => void;
-		destroy: () => void;
-	};
+	import Chart from 'chart.js/auto';
 
 	const maxPoints = 7;
-	const colors = ['#10b981', '#a855f7', '#ef4444'];
+	const colors = {
+		infaq: '#10b981',
+		jariyah: '#a855f7',
+		keluar: '#ef4444'
+	};
 
-	let chartContainer = $state<HTMLDivElement | undefined>(undefined);
-	let chart: { update: (data: ChartPayload) => void; destroy: () => void } | null = null;
-	let ChartCtor: FrappeChartCtor | null = null;
+	let chartCanvas = $state<HTMLCanvasElement | undefined>(undefined);
+	let chartInstance: Chart | null = null;
 	let mounted = false;
-	let renderedTheme: 'dark' | 'light' | null = null;
+	let canvasReady = false;
+	let resizeObserver: ResizeObserver | null = null;
 
 	let allTransactions = $derived($transactions);
 	let currentTheme = $derived($theme);
 
-	let chartPayload = $derived.by<ChartPayload>(() => {
+	let chartData = $derived.by(() => {
 		const grouped = new Map<string, { infaq: number; jariyah: number; keluar: number }>();
 		const sorted = [...allTransactions].sort((a, b) => a.tanggal.localeCompare(b.tanggal));
 
@@ -54,73 +44,163 @@
 
 		return {
 			labels: points.map(([date]) => formatDate(date)),
-			datasets: [
-				{ name: 'Infaq', values: points.map(([, values]) => values.infaq) },
-				{ name: 'Jariyah', values: points.map(([, values]) => values.jariyah) },
-				{ name: 'Keluar', values: points.map(([, values]) => values.keluar) }
-			]
+			infaq: points.map(([, values]) => values.infaq),
+			jariyah: points.map(([, values]) => values.jariyah),
+			keluar: points.map(([, values]) => values.keluar)
 		};
 	});
 
 	const wrapperClass = $derived(
 		currentTheme === 'dark'
-			? 'finance-chart finance-chart-dark bg-[#0f172a]'
-			: 'finance-chart finance-chart-light bg-slate-50'
+			? 'bg-[#0f172a]'
+			: 'bg-slate-50'
 	);
 
-	function buildOptions(data: ChartPayload) {
-		return {
-			data,
+	const textColor = $derived(currentTheme === 'dark' ? '#94a3b8' : '#64748b');
+	const gridColor = $derived(currentTheme === 'dark' ? '#334155' : '#e2e8f0');
+
+	async function createChart() {
+		await tick();
+		if (!chartCanvas || !mounted) return;
+
+		chartInstance?.destroy();
+
+		const ctx = chartCanvas.getContext('2d');
+		if (!ctx) return;
+
+		chartInstance = new Chart(ctx, {
 			type: 'bar',
-			height: 220,
-			colors,
-			barOptions: {
-				spaceRatio: 0.2,
-				barRadius: 20
+			data: {
+				labels: chartData.labels,
+				datasets: [
+					{
+						label: 'Infaq',
+						data: chartData.infaq,
+						backgroundColor: colors.infaq,
+						borderRadius: 4,
+						borderSkipped: false
+					},
+					{
+						label: 'Jariyah',
+						data: chartData.jariyah,
+						backgroundColor: colors.jariyah,
+						borderRadius: 4,
+						borderSkipped: false
+					},
+					{
+						label: 'Keluar',
+						data: chartData.keluar,
+						backgroundColor: colors.keluar,
+						borderRadius: 4,
+						borderSkipped: false
+					}
+				]
 			},
-			axisOptions: {
-				xIsSeries: 1,
-				shortenYAxisNumbers: 1
-			},
-			tooltipOptions: {
-				formatTooltipY: (value: number) => formatRupiah(value || 0)
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						display: false
+					},
+					tooltip: {
+						enabled: true,
+						callbacks: {
+							label: (context) => {
+								return `${context.dataset.label}: ${formatRupiah(context.raw as number)}`;
+							}
+						},
+						backgroundColor: currentTheme === 'dark' ? '#1e293b' : '#ffffff',
+						titleColor: currentTheme === 'dark' ? '#f1f5f9' : '#1e293b',
+						bodyColor: currentTheme === 'dark' ? '#94a3b8' : '#64748b',
+						borderColor: currentTheme === 'dark' ? '#334155' : '#e2e8f0',
+						borderWidth: 1,
+						cornerRadius: 12,
+						padding: 12
+					}
+				},
+				scales: {
+					x: {
+						grid: {
+							display: false
+						},
+						ticks: {
+							color: textColor
+						}
+					},
+					y: {
+						grid: {
+							color: gridColor
+						},
+						ticks: {
+							color: textColor,
+							callback: (value) => {
+								const num = Number(value);
+								if (num >= 1000000) return `${(num / 1000000).toFixed(1)}jt`;
+								if (num >= 1000) return `${(num / 1000).toFixed(0)}rb`;
+								return value;
+							}
+						}
+					}
+				},
+				animation: {
+					duration: 500
+				}
 			}
-		};
+		});
 	}
 
-	function recreateChart() {
-		if (!ChartCtor || !chartContainer) return;
-
-		chart?.destroy();
-		chartContainer.innerHTML = '';
-		chart = new ChartCtor(chartContainer, buildOptions(chartPayload));
-		renderedTheme = currentTheme;
-	}
-
-	onMount(async () => {
-		const module = await import('frappe-charts');
-		ChartCtor = module.Chart as FrappeChartCtor;
+	onMount(() => {
 		mounted = true;
-		recreateChart();
+		
+		// Delay chart creation to ensure canvas has dimensions
+		setTimeout(() => {
+			createChart();
+		}, 100);
 
 		return () => {
-			chart?.destroy();
-			chart = null;
+			chartInstance?.destroy();
+			resizeObserver?.disconnect();
 		};
 	});
 
 	$effect(() => {
-		if (!mounted || !ChartCtor || !chartContainer) return;
+		if (!mounted) return;
 
-		const data = chartPayload;
-		const theme = currentTheme;
-
-		if (!chart || renderedTheme !== theme) {
-			recreateChart();
+		// Watch for canvas binding
+		if (chartCanvas && !chartInstance) {
+			createChart();
 			return;
 		}
 
-		chart.update(data);
+		const data = chartData;
+		const theme = currentTheme;
+
+		if (!chartInstance) {
+			createChart();
+			return;
+		}
+
+		chartInstance.data.labels = data.labels;
+		chartInstance.data.datasets[0].data = data.infaq;
+		chartInstance.data.datasets[1].data = data.jariyah;
+		chartInstance.data.datasets[2].data = data.keluar;
+
+		if (chartInstance.options.scales?.x) {
+			chartInstance.options.scales.x.ticks!.color = theme === 'dark' ? '#94a3b8' : '#64748b';
+		}
+		if (chartInstance.options.scales?.y) {
+			chartInstance.options.scales.y.grid!.color = theme === 'dark' ? '#334155' : '#e2e8f0';
+			chartInstance.options.scales.y.ticks!.color = theme === 'dark' ? '#94a3b8' : '#64748b';
+		}
+		if (chartInstance.options.plugins?.tooltip) {
+			chartInstance.options.plugins.tooltip.backgroundColor = theme === 'dark' ? '#1e293b' : '#ffffff';
+			chartInstance.options.plugins.tooltip.titleColor = theme === 'dark' ? '#f1f5f9' : '#1e293b';
+			chartInstance.options.plugins.tooltip.bodyColor = theme === 'dark' ? '#94a3b8' : '#64748b';
+			chartInstance.options.plugins.tooltip.borderColor = theme === 'dark' ? '#334155' : '#e2e8f0';
+		}
+
+		chartInstance.update();
 	});
 </script>
 
@@ -141,60 +221,17 @@
 	</div>
 
 	<div class="relative overflow-hidden rounded-2xl p-3 {wrapperClass}">
-		{#if chartPayload.labels.length === 0}
+		{#if chartData.labels.length === 0}
 			<div class="flex h-[220px] items-center justify-center text-sm {currentTheme === 'dark' ? 'text-[#64748b]' : 'text-slate-400'}">
 				Belum ada data transaksi
 			</div>
 		{:else}
-			<div bind:this={chartContainer} class="h-[220px] w-full"></div>
+			<div class="h-[220px] w-full">
+				<canvas bind:this={chartCanvas}></canvas>
+			</div>
 			<div class="pointer-events-none absolute right-3 top-3 rounded-xl px-3 py-2 text-xs {currentTheme === 'dark' ? 'bg-[#1e293b]/80 text-[#94a3b8]' : 'bg-white/90 text-slate-500'}">
 				7 hari terakhir
 			</div>
 		{/if}
 	</div>
 </div>
-
-<style>
-	:global(.finance-chart .chart-container) {
-		width: 100%;
-	}
-
-	:global(.finance-chart .chart-legend) {
-		display: none;
-	}
-
-	:global(.finance-chart .graph-svg-tip) {
-		border-radius: 14px;
-		box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
-	}
-
-	:global(.finance-chart.finance-chart-dark .graph-svg-tip) {
-		background: #1e293b;
-		border-color: #334155;
-	}
-
-	:global(.finance-chart.finance-chart-dark .graph-svg-tip .title),
-	:global(.finance-chart.finance-chart-dark .graph-svg-tip ul li) {
-		color: #f1f5f9;
-	}
-
-	:global(.finance-chart.finance-chart-dark text) {
-		fill: #94a3b8;
-	}
-
-	:global(.finance-chart.finance-chart-dark .chart-line) {
-		stroke: #334155;
-	}
-
-	:global(.finance-chart.finance-chart-dark .dataset-units.dataset-y text) {
-		fill: #64748b;
-	}
-
-	:global(.finance-chart.finance-chart-light text) {
-		fill: #64748b;
-	}
-
-	:global(.finance-chart.finance-chart-light .chart-line) {
-		stroke: #e2e8f0;
-	}
-</style>
