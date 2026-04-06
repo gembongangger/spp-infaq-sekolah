@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { activeTab, theme } from '$lib/stores';
-	import { LayoutGrid, UserCheck, PlusCircle, List, Users, BarChart3 } from 'lucide-svelte';
+	import { LayoutGrid, UserCheck, PlusCircle, List, Users, BarChart3, ArrowRightLeft } from 'lucide-svelte';
 
 	const tabs = [
 		{ id: 'dashboard', label: 'Dashboard', icon: LayoutGrid },
@@ -8,7 +8,8 @@
 		{ id: 'input', label: 'Input', icon: PlusCircle },
 		{ id: 'transactions', label: 'Transaksi', icon: List },
 		{ id: 'senders', label: 'Pengirim', icon: Users },
-		{ id: 'reports', label: 'Laporan', icon: BarChart3 }
+		{ id: 'reports', label: 'Laporan', icon: BarChart3 },
+		{ id: 'penarikan', label: 'Penarikan', icon: ArrowRightLeft }
 	];
 
 	let currentTab = $derived($activeTab);

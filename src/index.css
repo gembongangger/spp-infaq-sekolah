@@ -5,8 +5,11 @@
 @source "../../src/";
 
 @theme {
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  
+  /* System fonts for faster loading */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+
   /* Optimize: Only include breakpoints you need */
   --breakpoint-sm: "640px";
   --breakpoint-md: "768px";
@@ -18,6 +21,7 @@
 @layer base {
   body {
     @apply font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
-

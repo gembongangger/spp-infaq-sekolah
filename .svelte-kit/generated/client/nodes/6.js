@@ -1,1 +1,1 @@
-export { default as component } from "../../../../src/routes/superadmin/dashboard/+page.svelte";
+export { default as component } from "../../../../src/routes/keuangan/penarikan/+page.svelte";

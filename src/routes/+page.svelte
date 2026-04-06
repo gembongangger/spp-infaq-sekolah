@@ -15,6 +15,7 @@
 	const sendersTabPromise = import('$lib/components/SendersTab.svelte');
 	const reportTabPromise = import('$lib/components/ReportTab.svelte');
 	const profileModalPromise = import('$lib/components/ProfileModal.svelte');
+	const adminPenarikanTabPromise = import('$lib/components/AdminPenarikanTab.svelte');
 
 	let showLogoutModal = $state(false);
 	let showProfileModal = $state(false);
@@ -391,6 +392,13 @@
 				onResetFilters={resetFilters}
 				{currentTheme}
 			/>
+		{/await}
+	{/if}
+
+	{#if $activeTab === 'penarikan'}
+		{#await adminPenarikanTabPromise then module}
+			{@const AdminPenarikanTab = module.default}
+			<AdminPenarikanTab />
 		{/await}
 	{/if}
 </div>

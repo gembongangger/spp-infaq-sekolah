@@ -8,18 +8,25 @@ export const nodes = [
 	() => import('./nodes/4'),
 	() => import('./nodes/5'),
 	() => import('./nodes/6'),
-	() => import('./nodes/7')
+	() => import('./nodes/7'),
+	() => import('./nodes/8'),
+	() => import('./nodes/9'),
+	() => import('./nodes/10'),
+	() => import('./nodes/11')
 ];
 
 export const server_loads = [];
 
 export const dictionary = {
-		"/": [2],
-		"/login": [3],
-		"/pengirim": [4],
-		"/reset-password": [5],
-		"/superadmin/dashboard": [6],
-		"/superadmin/login": [7]
+		"/": [3],
+		"/keuangan": [~4,[2]],
+		"/keuangan/dashboard": [5,[2]],
+		"/keuangan/penarikan": [6,[2]],
+		"/login": [7],
+		"/pengirim": [8],
+		"/reset-password": [9],
+		"/superadmin/dashboard": [10],
+		"/superadmin/login": [11]
 	};
 
 export const hooks = {

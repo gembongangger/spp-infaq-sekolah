@@ -53,7 +53,23 @@
 	// Helper function to get category color
 	function getCategoryColor(kategoriName: string): string {
 		const cat = allCategories.find(c => c.nama === kategoriName);
-		return cat?.warna || '#10b981';
+		return cat?.warna || getDefaultColor(kategoriName);
+	}
+
+	function getDefaultColor(kategoriName: string): string {
+		const name = kategoriName.toLowerCase();
+		if (name === 'infaq') return '#10b981';
+		if (name === 'jariyah') return '#a855f7';
+		if (name === 'penarikan') return '#ef4444';
+		return '#64748b';
+	}
+
+	function getCategoryEmoji(kategoriName: string): string {
+		const name = kategoriName.toLowerCase();
+		if (name === 'infaq') return '💚';
+		if (name === 'jariyah') return '💜';
+		if (name === 'penarikan') return '💸';
+		return '📁';
 	}
 
 	async function handleDeleteTransaction(id: string) {
@@ -105,7 +121,7 @@
 						class="px-5 py-3 text-sm text-center font-medium"
 						style="color: {getCategoryColor(record.kategori)};"
 					>
-						💚 {record.kategori}
+						{getCategoryEmoji(record.kategori)} {record.kategori}
 					</td>
 					<td class="px-5 py-3 text-sm text-right font-medium text-[#10b981]">
 						{record.jenis === Jenis.MASUK ? formatRupiah(record.jumlah) : '-'}

@@ -71,6 +71,20 @@ CREATE TABLE IF NOT EXISTS transaksi (
 	updated_at TEXT
 );
 
+-- Table: permintaan_penarikan
+CREATE TABLE IF NOT EXISTS permintaan_penarikan (
+    id TEXT PRIMARY KEY,
+    sekolah_id TEXT NOT NULL,
+    jumlah REAL NOT NULL,
+    keterangan TEXT,
+    status TEXT NOT NULL DEFAULT 'menunggu',
+    dibuat_oleh TEXT NOT NULL,
+    diproses_oleh TEXT,
+    tanggal_diproses TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
 -- Index untuk performa
 CREATE INDEX IF NOT EXISTS idx_user_email ON user(email);
 CREATE INDEX IF NOT EXISTS idx_user_username ON user(username);
@@ -80,3 +94,5 @@ CREATE INDEX IF NOT EXISTS idx_siswa_sekolah ON siswa(sekolah_id);
 CREATE INDEX IF NOT EXISTS idx_transaksi_sekolah ON transaksi(sekolah_id);
 CREATE INDEX IF NOT EXISTS idx_transaksi_tanggal ON transaksi(tanggal);
 CREATE INDEX IF NOT EXISTS idx_kategori_sekolah ON kategori(sekolah_id);
+CREATE INDEX IF NOT EXISTS idx_penarikan_sekolah ON permintaan_penarikan(sekolah_id);
+CREATE INDEX IF NOT EXISTS idx_penarikan_status ON permintaan_penarikan(status);

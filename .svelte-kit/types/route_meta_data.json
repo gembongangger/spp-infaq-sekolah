@@ -27,6 +27,15 @@
 	"/api/kategori/[id]": [
 		"src/routes/api/kategori/[id]/+server.ts"
 	],
+	"/api/penarikan": [
+		"src/routes/api/penarikan/+server.ts"
+	],
+	"/api/penarikan/[id]/setuju": [
+		"src/routes/api/penarikan/[id]/setuju/+server.ts"
+	],
+	"/api/penarikan/[id]/tolak": [
+		"src/routes/api/penarikan/[id]/tolak/+server.ts"
+	],
 	"/api/siswa": [
 		"src/routes/api/siswa/+server.ts"
 	],
@@ -66,6 +75,11 @@
 	"/api/transaksi/[id]": [
 		"src/routes/api/transaksi/[id]/+server.ts"
 	],
+	"/keuangan": [
+		"src/routes/keuangan/+page.server.ts"
+	],
+	"/keuangan/dashboard": [],
+	"/keuangan/penarikan": [],
 	"/login": [],
 	"/pengirim": [],
 	"/reset-password": [],

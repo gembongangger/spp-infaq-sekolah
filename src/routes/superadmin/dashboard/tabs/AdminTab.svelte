@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Plus, Edit, Trash2, Users, Mail, School } from 'lucide-svelte';
+	import { Plus, Edit, Trash2, Users, Mail, School, CheckCircle, XCircle } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import Modal from './Modal.svelte';
 
@@ -169,8 +169,12 @@
 		}
 	}
 
-	async function handleDelete(admin: Admin) {
-		if (!confirm(`Yakin ingin menonaktifkan admin "${admin.email}"?`)) {
+	async function handleToggle(admin: Admin) {
+		const message = admin.isActive
+			? `Yakin ingin menonaktifkan admin "${admin.email}"?`
+			: `Yakin ingin mengaktifkan kembali admin "${admin.email}"?`;
+		
+		if (!confirm(message)) {
 			return;
 		}
 
@@ -183,7 +187,34 @@
 			const result = await response.json();
 
 			if (!response.ok) {
-				throw new Error(result.message || 'Gagal menonaktifkan admin');
+				throw new Error(result.message || 'Gagal mengubah status admin');
+			}
+
+			await loadData();
+		} catch (err) {
+			alert(err instanceof Error ? err.message : 'Terjadi kesalahan');
+		}
+	}
+
+	async function handleDelete(admin: Admin) {
+		if (!confirm(`PERINGATAN! Yakin ingin MENGHAPUS PERMANEN admin "${admin.email}"?\n\nTindakan ini tidak dapat dibatalkan dan semua data terkait akan ikut terhapus.`)) {
+			return;
+		}
+
+		if (!confirm(`Apakah Anda benar-benar yakin?\n\nKlik OK untuk menghapus permanen.`)) {
+			return;
+		}
+
+		try {
+			const response = await fetch(`/api/superadmin/admin-sekolah/${admin.id}?permanent=true`, {
+				method: 'DELETE',
+				credentials: 'include',
+			});
+
+			const result = await response.json();
+
+			if (!response.ok) {
+				throw new Error(result.message || 'Gagal menghapus admin');
 			}
 
 			await loadData();
@@ -289,10 +320,27 @@
 							>
 								<Edit size={18} />
 							</button>
+							{#if admin.isActive}
+								<button
+									onclick={() => handleToggle(admin)}
+									class="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+									title="Nonaktifkan"
+								>
+									<XCircle size={18} />
+								</button>
+							{:else}
+								<button
+									onclick={() => handleToggle(admin)}
+									class="p-2 rounded-lg bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors"
+									title="Aktifkan"
+								>
+									<CheckCircle size={18} />
+								</button>
+							{/if}
 							<button
 								onclick={() => handleDelete(admin)}
-								class="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
-								title="Nonaktifkan"
+								class="p-2 rounded-lg bg-gray-500/10 text-gray-400 hover:bg-red-500/30 hover:text-red-300 transition-colors"
+								title="Hapus Permanen"
 							>
 								<Trash2 size={18} />
 							</button>
@@ -348,6 +396,7 @@
 					>
 						<option value="admin">Admin</option>
 						<option value="operator">Operator</option>
+						<option value="keuangan">Keuangan</option>
 					</select>
 				</div>
 				<div>
@@ -430,6 +479,7 @@
 					>
 						<option value="admin">Admin</option>
 						<option value="operator">Operator</option>
+						<option value="keuangan">Keuangan</option>
 					</select>
 				</div>
 				<div>

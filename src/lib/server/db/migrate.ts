@@ -2,13 +2,13 @@
  * Database Migration
  * Add profile fields to user table and ensure schema is up to date
  */
-import db from './index';
+import db from "./index";
 
 export async function migrate() {
-	console.log('Starting database migrations...');
+  console.log("Starting database migrations...");
 
-	// Create tables if they don't exist (for fresh Turso setup)
-	await db.execute(`
+  // Create tables if they don't exist (for fresh Turso setup)
+  await db.execute(`
 		CREATE TABLE IF NOT EXISTS user (
 			id TEXT PRIMARY KEY,
 			username TEXT NOT NULL UNIQUE,
@@ -25,7 +25,7 @@ export async function migrate() {
 		)
 	`);
 
-	await db.execute(`
+  await db.execute(`
 		CREATE TABLE IF NOT EXISTS sekolah (
 			id TEXT PRIMARY KEY,
 			nama TEXT NOT NULL,
@@ -41,7 +41,7 @@ export async function migrate() {
 		)
 	`);
 
-	await db.execute(`
+  await db.execute(`
 		CREATE TABLE IF NOT EXISTS siswa (
 			id TEXT PRIMARY KEY,
 			nomor_akun TEXT NOT NULL,
@@ -53,7 +53,7 @@ export async function migrate() {
 		)
 	`);
 
-	await db.execute(`
+  await db.execute(`
 		CREATE TABLE IF NOT EXISTS kategori (
 			id TEXT PRIMARY KEY,
 			nama TEXT NOT NULL,
@@ -63,7 +63,7 @@ export async function migrate() {
 		)
 	`);
 
-	await db.execute(`
+  await db.execute(`
 		CREATE TABLE IF NOT EXISTS transaksi (
 			id TEXT PRIMARY KEY,
 			tanggal TEXT NOT NULL,
@@ -83,39 +83,63 @@ export async function migrate() {
 		)
 	`);
 
-	// Add profile columns to user table if not exists
-	// Note: Turso doesn't support IF NOT EXISTS for ALTER TABLE, so we use try-catch
-	try {
-		await db.execute('ALTER TABLE user ADD COLUMN nama_lengkap TEXT');
-		console.log('Added nama_lengkap column to user table');
-	} catch (error: any) {
-		if (!error.message.includes('duplicate column') && !error.message.includes('already exists')) {
-			console.warn('Warning for nama_lengkap:', error.message);
-		}
-	}
+  await db.execute(`
+		CREATE TABLE IF NOT EXISTS permintaan_penarikan (
+			id TEXT PRIMARY KEY,
+			sekolah_id TEXT NOT NULL,
+			jumlah REAL NOT NULL,
+			keterangan TEXT,
+			status TEXT NOT NULL DEFAULT 'menunggu',
+			dibuat_oleh TEXT NOT NULL,
+			diproses_oleh TEXT,
+			tanggal_diproses TEXT,
+			created_at TEXT NOT NULL,
+			updated_at TEXT NOT NULL
+		)
+	`);
 
-	try {
-		await db.execute('ALTER TABLE user ADD COLUMN no_hp TEXT');
-		console.log('Added no_hp column to user table');
-	} catch (error: any) {
-		if (!error.message.includes('duplicate column') && !error.message.includes('already exists')) {
-			console.warn('Warning for no_hp:', error.message);
-		}
-	}
+  // Add profile columns to user table if not exists
+  // Note: Turso doesn't support IF NOT EXISTS for ALTER TABLE, so we use try-catch
+  try {
+    await db.execute("ALTER TABLE user ADD COLUMN nama_lengkap TEXT");
+    console.log("Added nama_lengkap column to user table");
+  } catch (error: any) {
+    if (
+      !error.message.includes("duplicate column") &&
+      !error.message.includes("already exists")
+    ) {
+      console.warn("Warning for nama_lengkap:", error.message);
+    }
+  }
 
-	try {
-		await db.execute('ALTER TABLE user ADD COLUMN foto_url TEXT');
-		console.log('Added foto_url column to user table');
-	} catch (error: any) {
-		if (!error.message.includes('duplicate column') && !error.message.includes('already exists')) {
-			console.warn('Warning for foto_url:', error.message);
-		}
-	}
+  try {
+    await db.execute("ALTER TABLE user ADD COLUMN no_hp TEXT");
+    console.log("Added no_hp column to user table");
+  } catch (error: any) {
+    if (
+      !error.message.includes("duplicate column") &&
+      !error.message.includes("already exists")
+    ) {
+      console.warn("Warning for no_hp:", error.message);
+    }
+  }
 
-	console.log('Database migrations completed successfully!');
+  try {
+    await db.execute("ALTER TABLE user ADD COLUMN foto_url TEXT");
+    console.log("Added foto_url column to user table");
+  } catch (error: any) {
+    if (
+      !error.message.includes("duplicate column") &&
+      !error.message.includes("already exists")
+    ) {
+      console.warn("Warning for foto_url:", error.message);
+    }
+  }
+
+  console.log("Database migrations completed successfully!");
 }
 
 // Run migration
 migrate().catch((error) => {
-	console.error('Migration error:', error);
+  console.error("Migration error:", error);
 });

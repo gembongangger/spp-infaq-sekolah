@@ -13,6 +13,8 @@
 	if ($authStore.isAuthenticated) {
 		if ($authStore.user?.role === 'superadmin') {
 			goto('/superadmin/dashboard');
+		} else if ($authStore.user?.role === 'keuangan') {
+			goto('/keuangan/dashboard');
 		} else {
 			goto('/');
 		}
@@ -37,6 +39,9 @@
 			if (userRole === 'superadmin') {
 				// Superadmin goes to superadmin dashboard
 				goto('/superadmin/dashboard');
+			} else if (userRole === 'keuangan') {
+				// Keuangan goes to keuangan dashboard
+				goto('/keuangan/dashboard');
 			} else {
 				// Regular admin goes to school dashboard
 				goto('/');
@@ -187,5 +192,6 @@
 	:global(body) {
 		margin: 0;
 		padding: 0;
+		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 	}
 </style>
