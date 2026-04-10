@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { UserX, History, X, Edit2, ChevronLeft, ChevronRight, Loader, FileSpreadsheet, Search } from 'lucide-svelte';
+	import { UserX, History, X, Edit2, ChevronLeft, ChevronRight, FileSpreadsheet, Search } from 'lucide-svelte';
 	import { formatRupiah, formatDate } from '$lib/utils';
 	import { siswaApi } from '$lib/api';
 	import { transactions as transactionsStore } from '$lib/stores';
 	import type { TransaksiData } from '$lib/types';
+	import Spinner from '$lib/components/Spinner.svelte';
 
 	interface Student {
 		id: string;
@@ -406,8 +407,8 @@
 
 			{#if isLoading}
 				<div class="py-12 text-center">
-					<Loader size={48} class="mx-auto mb-3 {textMuted} animate-spin" />
-					<p class="text-sm {textMuted}">Memuat data...</p>
+					<Spinner size="xl" color="emerald" />
+					<p class="text-sm {textMuted} mt-3">Memuat data...</p>
 				</div>
 			{:else if studentsWithStats.length > 0}
 				<div class="overflow-x-auto">

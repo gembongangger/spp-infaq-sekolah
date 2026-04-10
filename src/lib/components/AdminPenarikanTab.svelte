@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { authStore } from '$lib/auth-store';
 	import { Clock, CheckCircle, XCircle, RefreshCw, AlertCircle, ArrowRightLeft } from 'lucide-svelte';
+	import Spinner from '$lib/components/Spinner.svelte';
 
 	interface PenarikanData {
 		id: string;
@@ -233,8 +234,8 @@
 	<div class="bg-[#1e293b] rounded-xl border border-[#334155] overflow-hidden">
 		{#if loading}
 			<div class="p-8 text-center">
-				<div class="w-12 h-12 border-4 border-[#334155] border-t-emerald-500 rounded-full animate-spin mx-auto mb-4"></div>
-				<p class="text-[#64748b]">Memuat data...</p>
+				<Spinner size="lg" color="slate" />
+				<p class="text-[#64748b] mt-3">Memuat data...</p>
 			</div>
 		{:else if penarikans.length === 0}
 			<div class="p-8 text-center">
@@ -282,7 +283,7 @@
 										class="flex items-center gap-1 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
 									>
 										{#if processing === penarikan.id}
-											<div class="w-4 h-4 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></div>
+											<Spinner size="sm" color="emerald" />
 										{:else}
 											<CheckCircle size={14} />
 										{/if}
@@ -294,7 +295,7 @@
 										class="flex items-center gap-1 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
 									>
 										{#if processing === penarikan.id}
-											<div class="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin"></div>
+											<Spinner size="sm" color="red" />
 										{:else}
 											<XCircle size={14} />
 										{/if}

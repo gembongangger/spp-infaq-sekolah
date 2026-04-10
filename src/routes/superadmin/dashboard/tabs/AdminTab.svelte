@@ -2,6 +2,7 @@
 	import { Plus, Edit, Trash2, Users, Mail, School, CheckCircle, XCircle } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import Modal from './Modal.svelte';
+	import Spinner from '$lib/components/Spinner.svelte';
 
 	interface Admin {
 		id: string;
@@ -251,7 +252,7 @@
 
 	{#if isLoading}
 		<div class="text-center py-12">
-			<div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#3b82f6]"></div>
+			<Spinner size="lg" color="blue" />
 			<p class="mt-4 text-[#64748b]">Memuat data admin...</p>
 		</div>
 	{:else if admins.length === 0}

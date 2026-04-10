@@ -6,7 +6,8 @@
 	import { formatRupiah, formatDate } from '$lib/utils';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { Search, X, Printer, ArrowLeft, History, User, ChevronLeft, ChevronRight, Loader } from 'lucide-svelte';
+	import { Search, X, Printer, ArrowLeft, History, User, ChevronLeft, ChevronRight } from 'lucide-svelte';
+	import Spinner from '$lib/components/Spinner.svelte';
 
 	interface Student {
 		id: string;
@@ -306,8 +307,8 @@
 
 					{#if isLoading}
 						<div class="py-12 text-center">
-							<Loader size={48} class="mx-auto mb-3 {textMuted} animate-spin" />
-							<p class="text-sm {textMuted}">Memuat data...</p>
+							<Spinner size="xl" color="emerald" />
+							<p class="text-sm {textMuted} mt-3">Memuat data...</p>
 						</div>
 					{:else if studentsWithStats.length > 0}
 						<div class="overflow-x-auto">

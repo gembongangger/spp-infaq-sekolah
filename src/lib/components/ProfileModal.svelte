@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { X, User, Phone, Image as ImageIcon, Save, Loader, Mail } from 'lucide-svelte';
+	import { X, User, Phone, Image as ImageIcon, Save, Mail } from 'lucide-svelte';
 	import { authStore, updateProfile } from '$lib/auth-store';
 	import type { User as UserType } from '$lib/auth-store';
+	import Spinner from '$lib/components/Spinner.svelte';
 
 	interface Props {
 		isOpen: boolean;
@@ -206,7 +207,7 @@
 					class="flex-1 px-4 py-2.5 bg-[#10b981] hover:bg-[#059669] text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 				>
 					{#if isSaving}
-						<Loader size={18} class="animate-spin" />
+						<Spinner size="sm" color="white" />
 						Menyimpan...
 					{:else}
 						<Save size={18} />

@@ -2,6 +2,8 @@
 	import { onMount } from 'svelte';
 	import { penarikanApi, type PenarikanData } from '$lib/api';
 	import { ArrowUpRight, Clock, CheckCircle, XCircle, Plus, RefreshCw } from 'lucide-svelte';
+	import Spinner from '$lib/components/Spinner.svelte';
+	import Skeleton from '$lib/components/Skeleton.svelte';
 
 	let penarikans = $state<PenarikanData[]>([]);
 	let loading = $state(true);
@@ -172,7 +174,7 @@
 						class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 disabled:from-gray-600 disabled:to-gray-700 text-white font-medium rounded-xl transition-all disabled:cursor-not-allowed"
 					>
 						{#if submitting}
-							<div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+							<Spinner size="sm" color="white" />
 							<span>Mengirim...</span>
 						{:else}
 							<ArrowUpRight size={18} />
@@ -212,9 +214,9 @@
 				{#if loading}
 					<div class="space-y-4">
 						{#each [1, 2, 3] as _}
-							<div class="bg-[#0f172a] rounded-xl p-4 animate-pulse">
-								<div class="h-4 bg-[#334155] rounded w-1/3 mb-2"></div>
-								<div class="h-3 bg-[#334155] rounded w-1/2"></div>
+							<div class="bg-[#0f172a] rounded-xl p-4">
+								<Skeleton width="w-1/3" height="h-4" className="bg-[#334155] mb-2" />
+								<Skeleton width="w-1/2" height="h-3" className="bg-[#334155]" />
 							</div>
 						{/each}
 					</div>

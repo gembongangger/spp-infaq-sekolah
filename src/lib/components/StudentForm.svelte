@@ -4,6 +4,7 @@
 	import { siswaApi } from '$lib/api';
 	import type { SiswaData } from '$lib/api';
 	import { theme } from '$lib/stores';
+	import Spinner from '$lib/components/Spinner.svelte';
 
 	let nomorAkun = $state('');
 	let nama = $state('');
@@ -340,7 +341,7 @@
 					class="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-br from-[#10b981] to-[#059669] text-white flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					{#if isUploading}
-						<span class="animate-spin">⏳</span>
+						<Spinner size="sm" color="white" />
 					{:else}
 						<Upload size={16} />
 					{/if}

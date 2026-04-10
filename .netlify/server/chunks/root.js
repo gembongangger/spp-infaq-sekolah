@@ -1,4 +1,4 @@
-import { m as hydration_mismatch, H as HYDRATION_ERROR, C as COMMENT_NODE, n as HYDRATION_END, o as HYDRATION_START, q as HYDRATION_START_ELSE, r as get_next_sibling, t as tag, v as effect_tracking, w as get, x as render_effect, y as source, z as untrack, A as increment, B as queue_micro_task, D as active_effect, E as BOUNDARY_EFFECT, G as block, I as branch, J as create_text, K as pause_effect, L as current_batch, M as move_effect, N as defer_effect, O as set_active_effect, P as set_active_reaction, Q as set_component_context, R as Batch, S as handle_error, T as active_reaction, U as component_context, V as internal_set, W as destroy_effect, X as invoke_error_boundary, Y as svelte_boundary_reset_onerror, Z as HYDRATION_START_FAILED, _ as svelte_boundary_reset_noop, $ as EFFECT_TRANSPARENT, a0 as EFFECT_PRESERVED, a1 as define_property, a2 as init_operations, a3 as get_first_child, a4 as hydration_failed, a5 as clear_text_content, a6 as STATE_SYMBOL, a7 as state_proxy_unmount, a8 as lifecycle_double_unmount, a9 as component_root, aa as array_from, ab as is_passive_event, ac as push, ad as pop, ae as set, af as LEGACY_PROPS, ag as flushSync, ah as mutable_source, ai as render, F as FILENAME, aj as setContext, p as prevent_snippet_stringification, h as derived } from "./index4.js";
+import { m as hydration_mismatch, H as HYDRATION_ERROR, C as COMMENT_NODE, n as HYDRATION_END, o as HYDRATION_START, q as HYDRATION_START_ELSE, r as get_next_sibling, t as tag, v as effect_tracking, w as get, x as render_effect, y as source, z as untrack, A as increment, B as queue_micro_task, D as active_effect, E as BOUNDARY_EFFECT, G as block, I as branch, J as create_text, K as pause_effect, L as current_batch, M as move_effect, N as defer_effect, O as set_active_effect, P as set_active_reaction, Q as set_component_context, R as Batch, S as handle_error, T as active_reaction, U as component_context, V as internal_set, W as destroy_effect, X as invoke_error_boundary, Y as svelte_boundary_reset_onerror, Z as HYDRATION_START_FAILED, _ as svelte_boundary_reset_noop, $ as EFFECT_TRANSPARENT, a0 as EFFECT_PRESERVED, a1 as define_property, a2 as init_operations, a3 as get_first_child, a4 as hydration_failed, a5 as clear_text_content, a6 as STATE_SYMBOL, a7 as state_proxy_unmount, a8 as lifecycle_double_unmount, a9 as component_root, aa as array_from, ab as is_passive_event, ac as push, ad as pop, ae as set, af as LEGACY_PROPS, ag as flushSync, ah as mutable_source, ai as render, F as FILENAME, aj as setContext, p as prevent_snippet_stringification, j as derived } from "./index4.js";
 let hydrating = false;
 function set_hydrating(value) {
   hydrating = value;
@@ -879,7 +879,8 @@ function Root($$renderer, $$props) {
         components = [],
         form,
         data_0 = null,
-        data_1 = null
+        data_1 = null,
+        data_2 = null
       } = $$props;
       {
         setContext("__svelte__", stores);
@@ -887,7 +888,7 @@ function Root($$renderer, $$props) {
       {
         stores.page.set(page);
       }
-      const Pyramid_1 = derived(() => constructors[1]);
+      const Pyramid_2 = derived(() => constructors[2]);
       if (constructors[1]) {
         $$renderer2.push("<!--[0-->");
         const Pyramid_0 = constructors[0];
@@ -898,14 +899,45 @@ function Root($$renderer, $$props) {
             form,
             params: page.params,
             children: prevent_snippet_stringification(($$renderer3) => {
-              if (Pyramid_1()) {
-                $$renderer3.push("<!--[-->");
-                Pyramid_1()($$renderer3, { data: data_1, form, params: page.params });
-                $$renderer3.push("<!--]-->");
+              if (constructors[2]) {
+                $$renderer3.push("<!--[0-->");
+                const Pyramid_1 = constructors[1];
+                if (Pyramid_1) {
+                  $$renderer3.push("<!--[-->");
+                  Pyramid_1($$renderer3, {
+                    data: data_1,
+                    form,
+                    params: page.params,
+                    children: prevent_snippet_stringification(($$renderer4) => {
+                      if (Pyramid_2()) {
+                        $$renderer4.push("<!--[-->");
+                        Pyramid_2()($$renderer4, { data: data_2, form, params: page.params });
+                        $$renderer4.push("<!--]-->");
+                      } else {
+                        $$renderer4.push("<!--[!-->");
+                        $$renderer4.push("<!--]-->");
+                      }
+                    }),
+                    $$slots: { default: true }
+                  });
+                  $$renderer3.push("<!--]-->");
+                } else {
+                  $$renderer3.push("<!--[!-->");
+                  $$renderer3.push("<!--]-->");
+                }
               } else {
-                $$renderer3.push("<!--[!-->");
-                $$renderer3.push("<!--]-->");
+                $$renderer3.push("<!--[-1-->");
+                const Pyramid_1 = constructors[1];
+                if (Pyramid_1) {
+                  $$renderer3.push("<!--[-->");
+                  Pyramid_1($$renderer3, { data: data_1, form, params: page.params });
+                  $$renderer3.push("<!--]-->");
+                } else {
+                  $$renderer3.push("<!--[!-->");
+                  $$renderer3.push("<!--]-->");
+                }
               }
+              $$renderer3.push(`<!--]-->`);
             }),
             $$slots: { default: true }
           });

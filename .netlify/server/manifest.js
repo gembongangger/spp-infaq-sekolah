@@ -10,7 +10,7 @@ return {
 	assets: new Set([]),
 	mimeTypes: {},
 	_: {
-		client: {start:"_app/immutable/entry/start.w2Rn2F6w.js",app:"_app/immutable/entry/app.DO-y4Idj.js",imports:["_app/immutable/entry/start.w2Rn2F6w.js","_app/immutable/chunks/B13zQviO.js","_app/immutable/chunks/BOCA7Pam.js","_app/immutable/entry/app.DO-y4Idj.js","_app/immutable/chunks/BCwwHJ9q.js","_app/immutable/chunks/BOCA7Pam.js","_app/immutable/chunks/DkLvP5t2.js","_app/immutable/chunks/DeHHILCe.js","_app/immutable/chunks/yc5CQADX.js","_app/immutable/chunks/CWtA_Mbp.js"],stylesheets:[],fonts:[],uses_env_dynamic_public:false},
+		client: {start:"_app/immutable/entry/start.CGz-WRSO.js",app:"_app/immutable/entry/app.CMDaZrzp.js",imports:["_app/immutable/entry/start.CGz-WRSO.js","_app/immutable/chunks/CPpG6HxP.js","_app/immutable/chunks/j4uyQaSO.js","_app/immutable/entry/app.CMDaZrzp.js","_app/immutable/chunks/C_BT5Ho6.js","_app/immutable/chunks/j4uyQaSO.js","_app/immutable/chunks/BZCU3KwY.js","_app/immutable/chunks/DV95SPIY.js","_app/immutable/chunks/LWVT0P4Z.js","_app/immutable/chunks/CQR3Xto2.js","_app/immutable/chunks/B9fuJyvV.js"],stylesheets:[],fonts:[],uses_env_dynamic_public:false},
 		nodes: [
 			__memo(() => import('./nodes/0.js')),
 			__memo(() => import('./nodes/1.js')),
@@ -19,7 +19,11 @@ return {
 			__memo(() => import('./nodes/4.js')),
 			__memo(() => import('./nodes/5.js')),
 			__memo(() => import('./nodes/6.js')),
-			__memo(() => import('./nodes/7.js'))
+			__memo(() => import('./nodes/7.js')),
+			__memo(() => import('./nodes/8.js')),
+			__memo(() => import('./nodes/9.js')),
+			__memo(() => import('./nodes/10.js')),
+			__memo(() => import('./nodes/11.js'))
 		],
 		remotes: {
 			
@@ -29,7 +33,7 @@ return {
 				id: "/",
 				pattern: /^\/$/,
 				params: [],
-				page: { layouts: [0,], errors: [1,], leaf: 2 },
+				page: { layouts: [0,], errors: [1,], leaf: 3 },
 				endpoint: null
 			},
 			{
@@ -94,6 +98,27 @@ return {
 				params: [{"name":"id","optional":false,"rest":false,"chained":false}],
 				page: null,
 				endpoint: __memo(() => import('./entries/endpoints/api/kategori/_id_/_server.ts.js'))
+			},
+			{
+				id: "/api/penarikan",
+				pattern: /^\/api\/penarikan\/?$/,
+				params: [],
+				page: null,
+				endpoint: __memo(() => import('./entries/endpoints/api/penarikan/_server.ts.js'))
+			},
+			{
+				id: "/api/penarikan/[id]/setuju",
+				pattern: /^\/api\/penarikan\/([^/]+?)\/setuju\/?$/,
+				params: [{"name":"id","optional":false,"rest":false,"chained":false}],
+				page: null,
+				endpoint: __memo(() => import('./entries/endpoints/api/penarikan/_id_/setuju/_server.ts.js'))
+			},
+			{
+				id: "/api/penarikan/[id]/tolak",
+				pattern: /^\/api\/penarikan\/([^/]+?)\/tolak\/?$/,
+				params: [{"name":"id","optional":false,"rest":false,"chained":false}],
+				page: null,
+				endpoint: __memo(() => import('./entries/endpoints/api/penarikan/_id_/tolak/_server.ts.js'))
 			},
 			{
 				id: "/api/siswa",
@@ -187,38 +212,59 @@ return {
 				endpoint: __memo(() => import('./entries/endpoints/api/transaksi/_id_/_server.ts.js'))
 			},
 			{
+				id: "/keuangan",
+				pattern: /^\/keuangan\/?$/,
+				params: [],
+				page: { layouts: [0,2,], errors: [1,,], leaf: 4 },
+				endpoint: null
+			},
+			{
+				id: "/keuangan/dashboard",
+				pattern: /^\/keuangan\/dashboard\/?$/,
+				params: [],
+				page: { layouts: [0,2,], errors: [1,,], leaf: 5 },
+				endpoint: null
+			},
+			{
+				id: "/keuangan/penarikan",
+				pattern: /^\/keuangan\/penarikan\/?$/,
+				params: [],
+				page: { layouts: [0,2,], errors: [1,,], leaf: 6 },
+				endpoint: null
+			},
+			{
 				id: "/login",
 				pattern: /^\/login\/?$/,
 				params: [],
-				page: { layouts: [0,], errors: [1,], leaf: 3 },
+				page: { layouts: [0,], errors: [1,], leaf: 7 },
 				endpoint: null
 			},
 			{
 				id: "/pengirim",
 				pattern: /^\/pengirim\/?$/,
 				params: [],
-				page: { layouts: [0,], errors: [1,], leaf: 4 },
+				page: { layouts: [0,], errors: [1,], leaf: 8 },
 				endpoint: null
 			},
 			{
 				id: "/reset-password",
 				pattern: /^\/reset-password\/?$/,
 				params: [],
-				page: { layouts: [0,], errors: [1,], leaf: 5 },
+				page: { layouts: [0,], errors: [1,], leaf: 9 },
 				endpoint: null
 			},
 			{
 				id: "/superadmin/dashboard",
 				pattern: /^\/superadmin\/dashboard\/?$/,
 				params: [],
-				page: { layouts: [0,], errors: [1,], leaf: 6 },
+				page: { layouts: [0,], errors: [1,], leaf: 10 },
 				endpoint: null
 			},
 			{
 				id: "/superadmin/login",
 				pattern: /^\/superadmin\/login\/?$/,
 				params: [],
-				page: { layouts: [0,], errors: [1,], leaf: 7 },
+				page: { layouts: [0,], errors: [1,], leaf: 11 },
 				endpoint: null
 			}
 		],

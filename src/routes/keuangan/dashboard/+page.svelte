@@ -4,6 +4,7 @@
 	import { transaksiApi } from '$lib/api';
 	import { TrendingUp, Heart, TrendingDown, Wallet } from 'lucide-svelte';
 	import { theme } from '$lib/stores';
+	import Skeleton from '$lib/components/Skeleton.svelte';
 
 	let stats = $state({
 		totalInfaq: 0,
@@ -74,9 +75,9 @@
 	{#if loading}
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 			{#each [1, 2, 3, 4] as _}
-				<div class="{currentTheme === 'dark' ? 'bg-[#1e293b]' : 'bg-white'} rounded-2xl p-6 animate-pulse">
-					<div class="h-4 {currentTheme === 'dark' ? 'bg-[#334155]' : 'bg-slate-200'} rounded w-1/2 mb-4"></div>
-					<div class="h-8 {currentTheme === 'dark' ? 'bg-[#334155]' : 'bg-slate-200'} rounded w-3/4"></div>
+				<div class="{currentTheme === 'dark' ? 'bg-[#1e293b]' : 'bg-white'} rounded-2xl p-6">
+					<Skeleton width="w-1/2" height="h-4" />
+					<Skeleton width="w-3/4" height="h-8" class="mt-4" />
 				</div>
 			{/each}
 		</div>

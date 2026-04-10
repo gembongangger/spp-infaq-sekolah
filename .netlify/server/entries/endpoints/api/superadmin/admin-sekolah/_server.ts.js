@@ -1,13 +1,17 @@
 import { json } from "@sveltejs/kit";
 import { U as User } from "../../../../../chunks/User.js";
 import { S as Sekolah } from "../../../../../chunks/Sekolah.js";
+import { K as Kategori } from "../../../../../chunks/Kategori.js";
 import { a as auth } from "../../../../../chunks/index2.js";
 const GET = async ({ cookies, url }) => {
   try {
     const session = await auth.requireAuth(cookies);
     if (session.role !== "superadmin") {
       return json(
-        { success: false, message: "Akses ditolak. Hanya superadmin yang dapat mengakses." },
+        {
+          success: false,
+          message: "Akses ditolak. Hanya superadmin yang dapat mengakses."
+        },
         { status: 403 }
       );
     }
@@ -30,10 +34,7 @@ const GET = async ({ cookies, url }) => {
       noHp: admin.no_hp || null,
       createdAt: admin.created_at
     }));
-    return json(
-      { success: true, data: adminDTOs },
-      { status: 200 }
-    );
+    return json({ success: true, data: adminDTOs }, { status: 200 });
   } catch (error) {
     return json(
       { success: false, message: error.message },
@@ -46,7 +47,10 @@ const POST = async ({ request, cookies }) => {
     const session = await auth.requireAuth(cookies);
     if (session.role !== "superadmin") {
       return json(
-        { success: false, message: "Akses ditolak. Hanya superadmin yang dapat mengakses." },
+        {
+          success: false,
+          message: "Akses ditolak. Hanya superadmin yang dapat mengakses."
+        },
         { status: 403 }
       );
     }
@@ -78,6 +82,27 @@ const POST = async ({ request, cookies }) => {
       role: data.role || "admin",
       sekolah_id: data.sekolah_id
     });
+    if (data.role === "keuangan") {
+      try {
+        const existingKat = await Kategori.findByNamaAndSekolahId(
+          "penarikan",
+          data.sekolah_id
+        );
+        if (!existingKat) {
+          const existingGlobal = await Kategori.findByNama("penarikan");
+          if (!existingGlobal) {
+            await Kategori.create({
+              nama: "penarikan",
+              ikon: "ArrowDownCircle",
+              warna: "#ef4444",
+              sekolah_id: data.sekolah_id
+            });
+          }
+        }
+      } catch (katError) {
+        console.warn("Kategori penarikan mungkin sudah ada:", katError);
+      }
+    }
     return json(
       {
         success: true,

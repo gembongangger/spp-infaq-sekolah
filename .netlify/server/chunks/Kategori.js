@@ -51,6 +51,15 @@ const Kategori = {
     if (result.rows.length === 0) return null;
     return result.rows[0];
   },
+  /** Get kategori by nama and sekolah_id (exact match) */
+  async findByNamaAndSekolahId(nama, sekolahId) {
+    const result = await db.execute({
+      sql: "SELECT * FROM kategori WHERE nama = ? AND sekolah_id = ?",
+      args: [nama, sekolahId]
+    });
+    if (result.rows.length === 0) return null;
+    return result.rows[0];
+  },
   /** Create new kategori */
   async create(data) {
     const id = v4();

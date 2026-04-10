@@ -4,6 +4,7 @@
 	import { siswaApi } from '$lib/api';
 	import type { SiswaData } from '$lib/api';
 	import { theme } from '$lib/stores';
+	import Spinner from '$lib/components/Spinner.svelte';
 
 	let isDeleting = $state(false);
 	let currentTheme = $derived($theme);
@@ -164,8 +165,8 @@
 
 	{#if isLoading}
 		<div class="py-12 text-center">
-			<div class="w-12 h-12 mx-auto mb-3 rounded-full border-4 border-[#10b981]/20 border-t-[#10b981] animate-spin"></div>
-			<p class="text-sm {textMuted}">Memuat data...</p>
+			<Spinner size="lg" color="emerald" />
+			<p class="text-sm {textMuted} mt-3">Memuat data...</p>
 		</div>
 	{:else if students.length > 0}
 		<div class="overflow-x-auto">

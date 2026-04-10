@@ -72,6 +72,20 @@ async function migrate() {
 			updated_at TEXT
 		)
 	`);
+  await db.execute(`
+		CREATE TABLE IF NOT EXISTS permintaan_penarikan (
+			id TEXT PRIMARY KEY,
+			sekolah_id TEXT NOT NULL,
+			jumlah REAL NOT NULL,
+			keterangan TEXT,
+			status TEXT NOT NULL DEFAULT 'menunggu',
+			dibuat_oleh TEXT NOT NULL,
+			diproses_oleh TEXT,
+			tanggal_diproses TEXT,
+			created_at TEXT NOT NULL,
+			updated_at TEXT NOT NULL
+		)
+	`);
   try {
     await db.execute("ALTER TABLE user ADD COLUMN nama_lengkap TEXT");
     console.log("Added nama_lengkap column to user table");

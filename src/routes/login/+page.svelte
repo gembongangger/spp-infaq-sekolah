@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { theme } from '$lib/stores';
 	import { onMount } from 'svelte';
+	import Spinner from '$lib/components/Spinner.svelte';
 
 	let email = $state('');
 	let password = $state('');
@@ -207,7 +208,7 @@
 					class="w-full py-3 px-4 rounded-xl text-sm font-semibold bg-gradient-to-r from-[#10b981] to-[#059669] text-white hover:from-[#059669] hover:to-[#047857] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#10b981] {currentTheme === 'dark' ? 'focus:ring-offset-[#1e293b]' : 'focus:ring-offset-white'} transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
 				>
 					{#if isLoading}
-						<span class="animate-spin">⏳</span>
+						<Spinner size="sm" color="white" />
 						<span>Memproses...</span>
 					{:else}
 						<span>Masuk</span>

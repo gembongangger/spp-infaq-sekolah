@@ -7,7 +7,10 @@ const PUT = async ({ params, request, cookies }) => {
     const session = await auth.requireAuth(cookies);
     if (session.role !== "superadmin") {
       return json(
-        { success: false, message: "Akses ditolak. Hanya superadmin yang dapat mengakses." },
+        {
+          success: false,
+          message: "Akses ditolak. Hanya superadmin yang dapat mengakses."
+        },
         { status: 403 }
       );
     }
@@ -38,9 +41,11 @@ const PUT = async ({ params, request, cookies }) => {
     }
     if (data.role !== void 0) updateData.role = data.role;
     if (data.sekolah_id !== void 0) updateData.sekolah_id = data.sekolah_id;
-    if (data.nama_lengkap !== void 0) updateData.nama_lengkap = data.nama_lengkap;
+    if (data.nama_lengkap !== void 0)
+      updateData.nama_lengkap = data.nama_lengkap;
     if (data.no_hp !== void 0) updateData.no_hp = data.no_hp;
-    if (data.is_active !== void 0) updateData.is_active = data.is_active ? 1 : 0;
+    if (data.is_active !== void 0)
+      updateData.is_active = data.is_active ? 1 : 0;
     if (data.password) {
       await User.updatePassword(params.id, data.password);
     }
@@ -62,7 +67,11 @@ const PUT = async ({ params, request, cookies }) => {
     }
     const updatedUser = await User.findByIdRaw(params.id);
     return json(
-      { success: true, message: "Admin berhasil diperbarui", data: User.toDTO(updatedUser) },
+      {
+        success: true,
+        message: "Admin berhasil diperbarui",
+        data: User.toDTO(updatedUser)
+      },
       { status: 200 }
     );
   } catch (error) {
@@ -72,12 +81,15 @@ const PUT = async ({ params, request, cookies }) => {
     );
   }
 };
-const DELETE = async ({ params, cookies }) => {
+const DELETE = async ({ params, cookies, url }) => {
   try {
     const session = await auth.requireAuth(cookies);
     if (session.role !== "superadmin") {
       return json(
-        { success: false, message: "Akses ditolak. Hanya superadmin yang dapat mengakses." },
+        {
+          success: false,
+          message: "Akses ditolak. Hanya superadmin yang dapat mengakses."
+        },
         { status: 403 }
       );
     }
@@ -90,20 +102,34 @@ const DELETE = async ({ params, cookies }) => {
     }
     if (user.role === "superadmin") {
       return json(
-        { success: false, message: "Tidak dapat menghapus akun superadmin" },
+        { success: false, message: "Tidak dapat mengubah status superadmin" },
         { status: 400 }
       );
     }
-    const now = (/* @__PURE__ */ new Date()).toISOString();
     const db = (await import("../../../../../../chunks/index3.js")).default;
+    const now = (/* @__PURE__ */ new Date()).toISOString();
+    const isPermanent = url.searchParams.get("permanent") === "true";
+    if (isPermanent) {
+      await db.execute({
+        sql: "DELETE FROM permintaan_penarikan WHERE dibuat_oleh = ? OR diproses_oleh = ?",
+        args: [params.id, params.id]
+      });
+      await db.execute({
+        sql: "DELETE FROM user WHERE id = ?",
+        args: [params.id]
+      });
+      return json(
+        { success: true, message: "Admin berhasil dihapus permanen" },
+        { status: 200 }
+      );
+    }
+    const newStatus = user.is_active === 1 ? 0 : 1;
     await db.execute({
-      sql: "UPDATE user SET is_active = 0, updated_at = ? WHERE id = ?",
-      args: [now, params.id]
+      sql: "UPDATE user SET is_active = ?, updated_at = ? WHERE id = ?",
+      args: [newStatus, now, params.id]
     });
-    return json(
-      { success: true, message: "Admin berhasil dinonaktifkan" },
-      { status: 200 }
-    );
+    const message = newStatus === 1 ? "Admin berhasil diaktifkan" : "Admin berhasil dinonaktifkan";
+    return json({ success: true, message }, { status: 200 });
   } catch (error) {
     return json(
       { success: false, message: error.message },
